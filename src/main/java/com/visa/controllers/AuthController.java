@@ -61,6 +61,7 @@ public class AuthController {
 
 		try {
 		    System.out.println("Attempting authentication for user: " + authRequest.getUsername());
+		    System.out.println("Attempting authentication for user: " + authRequest.getPassword());
 		    authentication = authenticationManager.authenticate(
 		        new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
 		    );
