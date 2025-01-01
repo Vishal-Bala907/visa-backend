@@ -48,7 +48,7 @@ public class AuthController {
 
 	@PostMapping("/sign-up")
 	public String addNewUser(@RequestBody User userInfo) {
-		System.out.println(userInfo);
+		System.out.println(userInfo.getPassword());
 		userInfo.setRole("ROLE_USER");
 		String user = detailsServiceImplementation.addUser(userInfo);
 		return user;
@@ -58,24 +58,22 @@ public class AuthController {
 	public String authenticateAndGetToken(@RequestBody AuthenticationRequest authRequest,
 			HttpServletResponse response) {
 		Authentication authentication = null;
-
+		
+		System.out.println(authRequest.getPassword());
+		
 		try {
-		    System.out.println("Attempting authentication for user: " + authRequest.getUsername());
-		    System.out.println("Attempting authentication for user: " + authRequest.getPassword());
 		    authentication = authenticationManager.authenticate(
-		        new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword())
+		        new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword())
 		    );
-		    System.out.println("Authentication successful for user: " + authRequest.getUsername());
 		} catch (Exception e) {
-		    System.out.println("Authentication failed for user: " + authRequest.getUsername());
 		    e.printStackTrace();
 		    throw e;
 		}
 
 		if (authentication.isAuthenticated()) {
 			System.out.println("logged in");
-			String role = repository.findByUserName(authRequest.getUsername()).get().getRole();
-			String token = jwtService.generateToken(authRequest.getUsername(), role);
+			String role = repository.findByUserName(authRequest.getUserName()).get().getRole();
+			String token = jwtService.generateToken(authRequest.getUserName(), role);
 
 			// Set the token as an HTTP-only cookie
 			Cookie cookie = new Cookie("authToken", token);
