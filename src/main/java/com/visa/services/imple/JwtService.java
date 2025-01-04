@@ -17,51 +17,54 @@ import io.jsonwebtoken.security.Keys;
 
 @Service
 public class JwtService {
-	private String secretKey = "J5yH01iaIj6WJ/ZWZCG9Hfw/EMGdOx5aWs8G2BhIDGg=";
+//    @Value("${jwt.secret.key}")
+//    private String SECRET_KEY;
+    private String SECRET_KEY = "J5yH01iaIj6WJ/ZWZCG9Hfw/EMGdOx5aWs8G2BhIDGg=";
 
-//  @Value("${security.jwt.expiration-time}")
-//  private long jwtExpiration;
+//    @Value("${jwt.token.expiry}")
+    private long tokenExpiryDuration = 604800000;
 
-	public String generateToken(String username, String role) {
-		Map<String, Object> claims = new HashMap<>();
-		claims.put("role", role);
-		return createToken(claims, username);
-	}
+    public String generateToken(String mobileNumber) {
+        return Jwts.builder()
+                .setSubject(mobileNumber)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiryDuration)) // Configurable expiration time
+                .signWith(getSignKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
 
-	private String createToken(Map<String, Object> claims, String username) {
-		return Jwts.builder().setClaims(claims).setSubject(username).setIssuedAt(new Date(System.currentTimeMillis()))
-				.setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 30))
-				.signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
-	}
+    public String extractMobileNumber(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
 
-	private Key getSignKey() {
-		byte[] keybytes = Decoders.BASE64.decode(secretKey);
-		return Keys.hmacShaKeyFor(keybytes);
-	}
+    private Key getSignKey() {
+        byte[] keybytes = Decoders.BASE64.decode(SECRET_KEY);
+        return Keys.hmacShaKeyFor(keybytes);
+    }
 
-	public String extractUsername(String token) {
-		return extractClaim(token, Claims::getSubject);
-	}
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
 
-	public Date extractExpiration(String token) {
-		return extractClaim(token, Claims::getExpiration);
-	}
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
 
-	public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-		final Claims claims = extractAllClaims(token);
-		return claimsResolver.apply(claims);
-	}
+    private Claims extractAllClaims(String token) {
+        try {
+            return Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(token).getBody();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid or expired JWT token", e);
+        }
+    }
 
-	private Claims extractAllClaims(String token) {
-		return Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(token).getBody();
-	}
+    private Boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
 
-	private Boolean isTokenExpired(String token) {
-		return extractExpiration(token).before(new Date());
-	}
-
-	public Boolean validateToken(String token, UserDetails userDetails) {
-		final String username = extractUsername(token);
-		return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
-	}
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        final String mobile = extractMobileNumber(token);
+        return (mobile.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
 }

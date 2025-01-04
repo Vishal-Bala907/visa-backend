@@ -1,21 +1,32 @@
 package com.visa.controllers;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.visa.modals.AuthenticationRequest;
+import com.visa.modals.TokenDTO;
 import com.visa.modals.User;
 import com.visa.repos.UserRepository;
 import com.visa.services.imple.JwtService;
+import com.visa.services.imple.OtpServiceImple;
 import com.visa.services.imple.UserDetailsServiceImplementation;
 
 import jakarta.servlet.http.Cookie;
@@ -33,6 +44,8 @@ public class AuthController {
 	private UserDetailsServiceImplementation detailsServiceImplementation;
 	@Autowired
 	private UserRepository repository;
+	@Autowired
+	private OtpServiceImple otpService;
 
 	@GetMapping("/admin")
 	@PreAuthorize("hasRole('ADMIN')")
@@ -47,45 +60,34 @@ public class AuthController {
 	}
 
 	@PostMapping("/sign-up")
-	public String addNewUser(@RequestBody User userInfo) {
-		System.out.println(userInfo.getPassword());
+	public ResponseEntity<String> addNewUser(@RequestBody User userInfo) {
+//		System.out.println(userInfo.getPassword());
+
 		userInfo.setRole("ROLE_USER");
-		String user = detailsServiceImplementation.addUser(userInfo);
-		return user;
+		ResponseEntity<String> response = detailsServiceImplementation.addUser(userInfo);
+		return response;
+	}
+
+	@PostMapping("/get-otp")
+	public ResponseEntity<Map<String, String>> getOtp(@RequestParam String number) {
+		otpService.generateOtp(number);
+		return null;
 	}
 
 	@PostMapping("/login")
-	public String authenticateAndGetToken(@RequestBody AuthenticationRequest authRequest,
+	public ResponseEntity<TokenDTO> authenticateAndGetToken(@RequestBody AuthenticationRequest authRequest,
 			HttpServletResponse response) {
-		Authentication authentication = null;
-		
-		System.out.println(authRequest.getPassword());
-		
-		try {
-		    authentication = authenticationManager.authenticate(
-		        new UsernamePasswordAuthenticationToken(authRequest.getUserName(), authRequest.getPassword())
-		    );
-		} catch (Exception e) {
-		    e.printStackTrace();
-		    throw e;
+		String token = jwtService.generateToken(authRequest.getMobileNumber());
+		User user = repository.findByMobileNumber(authRequest.getMobileNumber()).get();
+		if (user == null) {
+			TokenDTO tokenDTO = TokenDTO.builder().email("").userName("").number("").token("").build();
+			return new ResponseEntity<TokenDTO>(tokenDTO, HttpStatus.NOT_FOUND);
 		}
 
-		if (authentication.isAuthenticated()) {
-			System.out.println("logged in");
-			String role = repository.findByUserName(authRequest.getUserName()).get().getRole();
-			String token = jwtService.generateToken(authRequest.getUserName(), role);
+		TokenDTO tokenDTO = TokenDTO.builder().email(user.getEmail()).userName(user.getUserName())
+				.number(user.getMobileNumber()).token(token).role(user.getRole()).build();
 
-			// Set the token as an HTTP-only cookie
-			Cookie cookie = new Cookie("authToken", token);
-			cookie.setHttpOnly(false);
-			cookie.setPath("/"); // Make the cookie available to the entire application
-			response.addCookie(cookie);
-
-			return token;
-		} else {
-//			System.out.println("login un-successfull");
-			throw new UsernameNotFoundException("invalid user request !");
-		}
+		return new ResponseEntity<TokenDTO>(tokenDTO, HttpStatus.OK);
 	}
 
 }

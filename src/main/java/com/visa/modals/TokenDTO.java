@@ -4,13 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Builder
-@ToString
-public class AuthenticationRequest {
-	private String mobileNumber;
+public class TokenDTO {
+	private String token;
+	private String userName;
+	private String email;
+	private String number;
+	private String role;
 }
