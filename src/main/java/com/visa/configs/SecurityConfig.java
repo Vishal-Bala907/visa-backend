@@ -34,9 +34,9 @@ public class SecurityConfig {
 	@Bean
 	SecurityFilterChain chain(HttpSecurity httpSecurity) throws Exception {
 		httpSecurity.authorizeHttpRequests(auth -> 
-		auth.requestMatchers("/api/v1/auth/**")
+		auth.requestMatchers("/api/v1/auth/**","/visa/**")
 				.permitAll()
-				.requestMatchers(HttpMethod.OPTIONS, "/admin/visa/**").permitAll()
+				.requestMatchers(HttpMethod.OPTIONS, "/admin/visa/**", "/data/**").permitAll()
 				.anyRequest().authenticated())
 		  .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 		  .exceptionHandling((exceptions)-> exceptions
