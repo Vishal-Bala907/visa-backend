@@ -19,6 +19,7 @@ public class EmbassyFees {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	private String title;
+	private Long minAge;
+	private Long maxAge;
 	private Long fees;
 }
