@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.visa.modals.DocumentType;
+import com.visa.modals.EmbassyFeesStructure;
 import com.visa.modals.Visa;
 import com.visa.modals.VisaType;
 import com.visa.repos.DocumentTypeRepo;
@@ -79,15 +81,18 @@ public class AdminVisaController {
 			@RequestParam String selectedTags, @RequestParam Long visaFee, @RequestParam Long serviceFee,
 			@RequestParam Long waitingTime, @RequestParam Long stayDuration, @RequestParam Long visaValidity,
 			@RequestParam String insuranceDetails, @RequestParam String description,
-			@RequestParam List<String> requiredDocuments, @RequestParam MultipartFile bannerImage) {
+			 @RequestPart("embassyFees") EmbassyFeesStructure embassyFees, @RequestParam List<String> requiredDocuments,
+			@RequestParam MultipartFile bannerImage) {
+
+		System.out.println(embassyFees);
 
 		Visa visa = Visa.builder().countyName(countryName).visaType(visaType).serviceFee(serviceFee).bannerImage(null)
-				.description(description).documents(requiredDocuments).insaurance(insuranceDetails).tag(selectedTags).visaFee(visaFee)
+				.description(description).documents(requiredDocuments).insaurance(insuranceDetails).tag(selectedTags).visaFee(visaFee).embassyFees(embassyFees)
 				.stayDuration(stayDuration).visaValidity(visaValidity).waitingTime(waitingTime).build();
 		
 		
-		boolean newVisa = adminVisaServiceImple.addNewVisa(visa, bannerImage);
-		
+		adminVisaServiceImple.addNewVisa(visa, bannerImage);
+
 		return new ResponseEntity<String>("OK", HttpStatus.CREATED);
 	}
 

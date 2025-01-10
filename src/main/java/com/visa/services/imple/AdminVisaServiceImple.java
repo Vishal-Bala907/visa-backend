@@ -30,7 +30,7 @@ public class AdminVisaServiceImple implements AdminVisaService {
 		
 		System.out.println(visa);
 		
-		Visa save = visaRepo.save(visa);
+		visaRepo.save(visa);
 		CountryName countryName = null;
 		
 		// save the country first

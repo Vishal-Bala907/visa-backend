@@ -2,11 +2,14 @@ package com.visa.modals;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,4 +40,6 @@ public class Visa {
 	@ElementCollection
 	private List<String> documents;
 	private String tag;
+	@OneToOne(cascade = CascadeType.ALL , fetch = FetchType.EAGER)
+	private EmbassyFeesStructure embassyFees;
 }

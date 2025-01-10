@@ -7,7 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,7 +31,7 @@ public class User {
     private String userName;
 
     @Column(unique = true, nullable = false)
-    @Min(value = 10 , message = "please enter a 10 digit mobile number")
+    @Size(min = 10, max = 15, message = "Please enter a valid mobile number with 10 to 15 digits")
     private String mobileNumber;
 
     @Column(unique = true, nullable = false)
