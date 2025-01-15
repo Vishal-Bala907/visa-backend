@@ -1,13 +1,16 @@
 package com.visa.controllers;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.visa.modals.User;
@@ -30,11 +33,17 @@ public class BasicController {
 	private UserRepository repository;
 
 	@GetMapping("/visas")
-	@PreAuthorize("hasAnyRole('ADMIN','USER')")
 	public ResponseEntity<List<Visa>> getAllVisas() {
 		List<Visa> allVisas = basicServiceImple.getAllVisas();
 		System.out.println(allVisas);
 		return ResponseEntity.ok().body(allVisas);
+	}
+	
+	@GetMapping("/country/name/{countryName}")
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	public ResponseEntity<List<Visa>> getAllCountrySpecifivVisas(@PathVariable String countryName) {
+		List<Visa> visasByCountryName = basicServiceImple.getVisasByCountryName(countryName);
+		return new ResponseEntity<List<Visa>>(visasByCountryName , HttpStatus.OK);
 	}
 
 	@GetMapping("/profile")
@@ -46,19 +55,20 @@ public class BasicController {
 	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 	    }
 
-	    // Extract the token
 	    String token = authHeader.substring(7); // Remove "Bearer " prefix
 	    System.out.println("Token: " + token);
 
-	    // Extract the mobile number
 	    String mobileNumber = jwtService.extractMobileNumber(token);
 	    User user = repository.findByMobileNumber(mobileNumber).get();
 
-	    // Fetch the user's profile (replace with actual logic)
-	    // User user = userService.findByMobileNumber(mobileNumber);
-	    // return ResponseEntity.ok(user);
-
 	    return ResponseEntity.ok(user); // Placeholder
+	}
+	
+	@GetMapping("/doc/checklist/{countryName}")
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	public ResponseEntity<Set<String>> getDocCheckList(@PathVariable String countryName) {
+		Set<String> allVisaDocs = basicServiceImple.getAllVisaDocs(countryName);
+		return new ResponseEntity<Set<String>>(allVisaDocs , HttpStatus.OK);
 	}
 
 }

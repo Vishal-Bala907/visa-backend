@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
@@ -16,41 +17,31 @@ import com.visa.modals.Visa;
 @Service
 public class FileService {
 
-	@Value("${banner.image}")
-	private String bannerImagePath;
-	
-	@Value("${banner.image.ft}")
-	private String bannerImageFrontend;
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
-	public Visa updateOrSaveProfilePic(Visa visa, MultipartFile file) {
-		String fileName = file.getOriginalFilename();
-	
-		// rename the file
-		try {
-			InputStream inputStream = file.getInputStream();
+    public Visa updateOrSaveProfilePic(Visa visa, MultipartFile file) {
+        String fileName = file.getOriginalFilename();
 
-			String fileSavePath = bannerImagePath + File.separator + visa.getId() + fileName;
-//		    File fileToSave = new File(fileSavePath);
-			File fileDirectory = new File(bannerImagePath + File.separator);
-			// making directory
-			if (!fileDirectory.exists()) {
-				boolean mkdirs = fileDirectory.mkdirs();
-				if (mkdirs) {
-					System.out.println("Folders created");
-				} else {
-					System.err.println("Unable to create");
-				}
-			}
+        try (InputStream inputStream = file.getInputStream()) {
+            // Resolve the relative path based on the working directory
+        	System.out.println(System.getProperty("user.dir"));
+            Path fileSavePath = Paths.get(System.getProperty("user.dir"), uploadDir, visa.getId() + "_" + fileName);
+            File fileDirectory = fileSavePath.getParent().toFile();
 
-			// copying
-			Files.copy(inputStream, Paths.get(fileSavePath), StandardCopyOption.REPLACE_EXISTING);
-			visa.setBannerImage(bannerImageFrontend + "/" + visa.getId() + fileName);
-			return visa;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
+            // Create directories if they don't exist
+            if (!fileDirectory.exists() && !fileDirectory.mkdirs()) {
+                throw new IOException("Failed to create directory: " + fileDirectory.getAbsolutePath());
+            }
 
-	}
+            // Save the file
+            Files.copy(inputStream, fileSavePath, StandardCopyOption.REPLACE_EXISTING);
+            visa.setBannerImage("images/" + visa.getId() + "_" + fileName);
 
+            return visa;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
