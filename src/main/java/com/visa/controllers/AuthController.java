@@ -52,8 +52,6 @@ public class AuthController {
 
 	@PostMapping("/sign-up")
 	public ResponseEntity<String> addNewUser(@RequestBody User userInfo) {
-//		System.out.println(userInfo.getPassword());
-
 		userInfo.setRole("ROLE_USER");
 		ResponseEntity<String> response = detailsServiceImplementation.addUser(userInfo);
 		return response;

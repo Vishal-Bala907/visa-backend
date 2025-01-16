@@ -1,5 +1,6 @@
 package com.visa.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,18 +61,24 @@ public class AdminVisaController {
 		return new ResponseEntity<List<String>>(visaTypes, HttpStatus.CREATED);
 	}
 
+	@GetMapping("/docs")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<List<String>> getDocumentType() {
+		ArrayList<String> collect = typeRepo.findAll().stream().map(DocumentType::getDocumentName).collect(Collectors.toCollection(ArrayList::new));
+		return new ResponseEntity<List<String>>(collect, HttpStatus.CREATED);
+	}
 	@PostMapping("/add-doc-type")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<List<String>> addDocumentType(@RequestBody DocumentType docType) {
 		Optional<DocumentType> type = typeRepo.findByDocumentName(docType.getDocumentName());
-
+		
 		if (type.isPresent()) {
 			return new ResponseEntity<List<String>>(List.of(), HttpStatus.CONFLICT);
 		}
-
+		
 		typeRepo.save(docType);
 		List<String> docs = typeRepo.findAll().stream().map(DocumentType::getDocumentName).collect(Collectors.toList());
-
+		
 		return new ResponseEntity<List<String>>(docs, HttpStatus.CREATED);
 	}
 
