@@ -7,7 +7,9 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.visa.modals.User;
 import com.visa.modals.Visa;
+import com.visa.repos.UserRepository;
 import com.visa.repos.VisaRepo;
 import com.visa.services.interfaces.BasicService;
 
@@ -16,6 +18,8 @@ public class BasicServiceImple implements BasicService {
 
 	@Autowired
 	private VisaRepo visaRepo;
+	@Autowired
+	private UserRepository userRepository;
 
 	@Override
 	public List<Visa> getAllVisas() {
@@ -43,6 +47,23 @@ public class BasicServiceImple implements BasicService {
 		});
 		
 		return documents;
+	}
+
+	@Override
+	public User updateUser(User user) {
+		User user2 = userRepository.findById(user.getId()).get();
+		if(user2 == null) {
+			return null;
+		} else {
+			user2.setUserName(user.getUserName());
+			user2.setMobileNumber(user.getMobileNumber());
+			user2.setEmail(user.getEmail());
+			
+			userRepository.save(user2);
+			
+			return user2;
+		}
+
 	}
 
 }

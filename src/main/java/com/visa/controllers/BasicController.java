@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -69,6 +70,15 @@ public class BasicController {
 	public ResponseEntity<Set<String>> getDocCheckList(@PathVariable String countryName) {
 		Set<String> allVisaDocs = basicServiceImple.getAllVisaDocs(countryName);
 		return new ResponseEntity<Set<String>>(allVisaDocs , HttpStatus.OK);
+	}
+	@GetMapping("/update/profile")
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	public ResponseEntity<User> updateProfile(@RequestBody User user) {
+		 User updateUser = basicServiceImple.updateUser(user);
+		if(updateUser == null) {
+			return new ResponseEntity<User>(user , HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<User>(updateUser , HttpStatus.OK);
 	}
 
 }
