@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -64,21 +65,23 @@ public class AdminVisaController {
 	@GetMapping("/docs")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<List<String>> getDocumentType() {
-		ArrayList<String> collect = typeRepo.findAll().stream().map(DocumentType::getDocumentName).collect(Collectors.toCollection(ArrayList::new));
+		ArrayList<String> collect = typeRepo.findAll().stream().map(DocumentType::getDocumentName)
+				.collect(Collectors.toCollection(ArrayList::new));
 		return new ResponseEntity<List<String>>(collect, HttpStatus.CREATED);
 	}
+
 	@PostMapping("/add-doc-type")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<List<String>> addDocumentType(@RequestBody DocumentType docType) {
 		Optional<DocumentType> type = typeRepo.findByDocumentName(docType.getDocumentName());
-		
+
 		if (type.isPresent()) {
 			return new ResponseEntity<List<String>>(List.of(), HttpStatus.CONFLICT);
 		}
-		
+
 		typeRepo.save(docType);
 		List<String> docs = typeRepo.findAll().stream().map(DocumentType::getDocumentName).collect(Collectors.toList());
-		
+
 		return new ResponseEntity<List<String>>(docs, HttpStatus.CREATED);
 	}
 
@@ -88,19 +91,48 @@ public class AdminVisaController {
 			@RequestParam String selectedTags, @RequestParam Long visaFee, @RequestParam Long serviceFee,
 			@RequestParam Long waitingTime, @RequestParam Long stayDuration, @RequestParam Long visaValidity,
 			@RequestParam String insuranceDetails, @RequestParam String description,
-			 @RequestPart("embassyFees") EmbassyFeesStructure embassyFees, @RequestParam List<String> requiredDocuments,
+			@RequestPart("embassyFees") EmbassyFeesStructure embassyFees, @RequestParam List<String> requiredDocuments,
 			@RequestParam MultipartFile bannerImage) {
 
 		System.out.println(embassyFees);
 
 		Visa visa = Visa.builder().countyName(countryName).visaType(visaType).serviceFee(serviceFee).bannerImage(null)
-				.description(description).documents(requiredDocuments).insaurance(insuranceDetails).tag(selectedTags).visaFee(visaFee).embassyFees(embassyFees)
-				.stayDuration(stayDuration).visaValidity(visaValidity).waitingTime(waitingTime).build();
-		
-		
+				.description(description).documents(requiredDocuments).insaurance(insuranceDetails).tag(selectedTags)
+				.visaFee(visaFee).embassyFees(embassyFees).stayDuration(stayDuration).visaValidity(visaValidity)
+				.waitingTime(waitingTime).build();
+
 		adminVisaServiceImple.addNewVisa(visa, bannerImage);
 
 		return new ResponseEntity<String>("OK", HttpStatus.CREATED);
 	}
+
+	@PutMapping("/update/visa")
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	public ResponseEntity<List<Visa>> updateProfile(@RequestBody Visa visa) {
+		
+		System.out.println("CALLED");
+		
+		try {
+			List<Visa> updateVisa = adminVisaServiceImple.updateVisa(visa);
+			return new ResponseEntity<List<Visa>>(updateVisa, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<List<Visa>>(List.of(visa), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+//	@PutMapping("/update/image")
+//	@PreAuthorize("hasAnyRole('ADMIN')")
+//	public ResponseEntity<List<Visa>> updateProfile(@RequestBody Visa visa) {
+//		
+//		System.out.println("CALLED");
+//		
+//		try {
+//			List<Visa> updateVisa = adminVisaServiceImple.updateVisa(visa);
+//			return new ResponseEntity<List<Visa>>(updateVisa, HttpStatus.OK);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			return new ResponseEntity<List<Visa>>(List.of(visa), HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+//	}
 
 }

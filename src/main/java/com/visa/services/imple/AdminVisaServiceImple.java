@@ -2,6 +2,7 @@ package com.visa.services.imple;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -59,6 +60,48 @@ public class AdminVisaServiceImple implements AdminVisaService {
 		}
 		
 		return false;
+	}
+
+	@Override
+	public List<Visa> updateVisa(Visa visa) {
+		final Long visaId = visa.getId();
+		if(visaId == null) {
+			return null;
+		}
+		
+		// get the original visa id
+		Optional<Visa> byId = visaRepo.findById(visaId);
+		Visa requestedVisa = byId.orElseThrow(() ->  new NullPointerException("visa not found"));
+		
+		// update the requestedVisa values
+//		System.out.println(visa.getCountyName());
+		System.out.println(visa);
+		String countryName = "";
+		System.out.println(visa.getCountyName());
+		if(visa.getCountyName() == null) {
+			countryName = requestedVisa.getCountyName();
+		} else {
+			countryName = visa.getCountyName();
+		}
+		requestedVisa.setCountyName(countryName);
+		requestedVisa.setDescription(visa.getDescription());
+		requestedVisa.setDocuments(visa.getDocuments());
+		requestedVisa.setServiceFee(visa.getServiceFee());
+		requestedVisa.setStayDuration(visa.getStayDuration());
+		requestedVisa.setTag(visa.getTag());
+		requestedVisa.setVisaFee(visa.getVisaFee());
+		requestedVisa.setVisaType(visa.getVisaType());
+		requestedVisa.setVisaValidity(visa.getVisaValidity());
+		requestedVisa.setWaitingTime(visa.getWaitingTime());
+		
+		String insurrance = visa.getInsaurance();
+		if(insurrance == null) {
+			insurrance = "";
+		}
+		
+		requestedVisa.setInsaurance(visa.getInsaurance());
+		visaRepo.save(requestedVisa);
+		return visaRepo.findAll();
 	}
 
 }

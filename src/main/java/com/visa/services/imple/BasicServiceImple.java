@@ -51,12 +51,11 @@ public class BasicServiceImple implements BasicService {
 
 	@Override
 	public User updateUser(User user) {
-		User user2 = userRepository.findById(user.getId()).get();
+		User user2 = userRepository.findByMobileNumber(user.getMobileNumber()).get();
 		if(user2 == null) {
 			return null;
 		} else {
 			user2.setUserName(user.getUserName());
-			user2.setMobileNumber(user.getMobileNumber());
 			user2.setEmail(user.getEmail());
 			
 			userRepository.save(user2);
