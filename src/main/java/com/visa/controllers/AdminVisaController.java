@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.visa.modals.DocumentType;
 import com.visa.modals.EmbassyFeesStructure;
+import com.visa.modals.ImageUpdateDTO;
 import com.visa.modals.Visa;
 import com.visa.modals.VisaType;
 import com.visa.repos.DocumentTypeRepo;
@@ -109,9 +110,6 @@ public class AdminVisaController {
 	@PutMapping("/update/visa")
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	public ResponseEntity<List<Visa>> updateProfile(@RequestBody Visa visa) {
-		
-		System.out.println("CALLED");
-		
 		try {
 			List<Visa> updateVisa = adminVisaServiceImple.updateVisa(visa);
 			return new ResponseEntity<List<Visa>>(updateVisa, HttpStatus.OK);
@@ -120,19 +118,12 @@ public class AdminVisaController {
 			return new ResponseEntity<List<Visa>>(List.of(visa), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
-//	@PutMapping("/update/image")
-//	@PreAuthorize("hasAnyRole('ADMIN')")
-//	public ResponseEntity<List<Visa>> updateProfile(@RequestBody Visa visa) {
-//		
-//		System.out.println("CALLED");
-//		
-//		try {
-//			List<Visa> updateVisa = adminVisaServiceImple.updateVisa(visa);
-//			return new ResponseEntity<List<Visa>>(updateVisa, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<List<Visa>>(List.of(visa), HttpStatus.INTERNAL_SERVER_ERROR);
-//		}
-//	}
+	@PutMapping("/update/image")
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	public ResponseEntity<List<Visa>> updateImage(@RequestBody ImageUpdateDTO imageUpdate) {
+		
+		return null;	
+		
+	}
 
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.visa.modals.CountryName;
+import com.visa.modals.ImageUpdateDTO;
 import com.visa.modals.Visa;
 import com.visa.repos.CountryNameRepo;
 import com.visa.repos.VisaRepo;
@@ -102,6 +103,13 @@ public class AdminVisaServiceImple implements AdminVisaService {
 		requestedVisa.setInsaurance(visa.getInsaurance());
 		visaRepo.save(requestedVisa);
 		return visaRepo.findAll();
+	}
+
+	@Override
+	public List<Visa> updateImage(ImageUpdateDTO imageUpdateDTO) {
+		// delete image
+
+		return null;
 	}
 
 }

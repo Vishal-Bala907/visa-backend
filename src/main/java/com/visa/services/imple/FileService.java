@@ -44,4 +44,25 @@ public class FileService {
             return null;
         }
     }
+    
+    
+    public void deleteImageByVisaId(String img) throws Exception {
+        // Fetch the image details from the database (if needed)
+        // For example:
+        // String imageName = imageRepository.findImageNameByVisaId(visaId);
+
+        // Assuming the image filename is derived from the visaId
+        String imageName = img.split("/")[1]; // Adjust based on your naming convention
+        Path imagePath = Paths.get(uploadDir, imageName);
+
+        // Delete the image file
+        if (Files.exists(imagePath)) {
+            Files.delete(imagePath);
+        } else {
+            throw new Exception("Image not found");
+        }
+
+        // Optionally, remove the image record from the database
+        // imageRepository.deleteByVisaId(visaId);
+    }
 }
