@@ -1,7 +1,9 @@
 package com.visa.controllers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,8 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.visa.modals.Blog;
 import com.visa.modals.User;
 import com.visa.modals.Visa;
+import com.visa.repos.BlogInterface;
 import com.visa.repos.UserRepository;
 import com.visa.services.imple.BasicServiceImple;
 import com.visa.services.imple.JwtService;
@@ -32,6 +36,8 @@ public class BasicController {
 	private JwtService jwtService;
 	@Autowired
 	private UserRepository repository;
+	@Autowired
+	BlogInterface blogInterface;
 
 	@GetMapping("/visas")
 	public ResponseEntity<List<Visa>> getAllVisas() {
@@ -39,49 +45,55 @@ public class BasicController {
 		System.out.println(allVisas);
 		return ResponseEntity.ok().body(allVisas);
 	}
-	
+
+	@GetMapping("/blogs/country-names")
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	public ResponseEntity<List<String>> getAllCountryBlog() {
+		ArrayList<String> collect = blogInterface.findAll().stream().map(Blog::getCountryName)
+				.collect(Collectors.toCollection(ArrayList::new));
+		return ResponseEntity.ok().body(collect);
+	}
+
 	@GetMapping("/country/name/{countryName}")
 	@PreAuthorize("hasAnyRole('ADMIN','USER')")
 	public ResponseEntity<List<Visa>> getAllCountrySpecifivVisas(@PathVariable String countryName) {
 		List<Visa> visasByCountryName = basicServiceImple.getVisasByCountryName(countryName);
-		return new ResponseEntity<List<Visa>>(visasByCountryName , HttpStatus.OK);
+		return new ResponseEntity<List<Visa>>(visasByCountryName, HttpStatus.OK);
 	}
 
 	@GetMapping("/profile")
 	@PreAuthorize("hasAnyRole('ADMIN','USER')")
 	public ResponseEntity<User> getProfile(HttpServletRequest request) {
-	    String authHeader = request.getHeader("Authorization");
+		String authHeader = request.getHeader("Authorization");
 
-	    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-	    }
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+		}
 
-	    String token = authHeader.substring(7); // Remove "Bearer " prefix
-	    System.out.println("Token: " + token);
+		String token = authHeader.substring(7); // Remove "Bearer " prefix
+		System.out.println("Token: " + token);
 
-	    String mobileNumber = jwtService.extractMobileNumber(token);
-	    User user = repository.findByMobileNumber(mobileNumber).get();
+		String mobileNumber = jwtService.extractMobileNumber(token);
+		User user = repository.findByMobileNumber(mobileNumber).get();
 
-	    return ResponseEntity.ok(user); // Placeholder
+		return ResponseEntity.ok(user); // Placeholder
 	}
-	
+
 	@GetMapping("/doc/checklist/{countryName}")
 	@PreAuthorize("hasAnyRole('ADMIN','USER')")
 	public ResponseEntity<Set<String>> getDocCheckList(@PathVariable String countryName) {
 		Set<String> allVisaDocs = basicServiceImple.getAllVisaDocs(countryName);
-		return new ResponseEntity<Set<String>>(allVisaDocs , HttpStatus.OK);
+		return new ResponseEntity<Set<String>>(allVisaDocs, HttpStatus.OK);
 	}
-	
+
 	@PutMapping("/update/profile")
 	@PreAuthorize("hasAnyRole('ADMIN','USER')")
 	public ResponseEntity<User> updateProfile(@RequestBody User user) {
-		 User updateUser = basicServiceImple.updateUser(user);
-		if(updateUser == null) {
-			return new ResponseEntity<User>(user , HttpStatus.INTERNAL_SERVER_ERROR);
+		User updateUser = basicServiceImple.updateUser(user);
+		if (updateUser == null) {
+			return new ResponseEntity<User>(user, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		return new ResponseEntity<User>(updateUser , HttpStatus.OK);
+		return new ResponseEntity<User>(updateUser, HttpStatus.OK);
 	}
-	
-
 
 }

@@ -3,15 +3,18 @@ package com.visa.services.imple;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.visa.modals.Blog;
 import com.visa.modals.CountryName;
 import com.visa.modals.EmbassyFeesStructure;
 import com.visa.modals.ImageUpdateDTO;
 import com.visa.modals.Visa;
+import com.visa.repos.BlogInterface;
 import com.visa.repos.CountryNameRepo;
 import com.visa.repos.VisaRepo;
 import com.visa.services.interfaces.AdminVisaService;
@@ -27,6 +30,8 @@ public class AdminVisaServiceImple implements AdminVisaService {
 	private CountryNameServiceImple countryNameService;
 	@Autowired
 	private CountryNameRepo countryNameRepo;
+	@Autowired
+	private BlogInterface blogInterface;
 
 	@Override
 	public boolean addNewVisa(Visa visa, MultipartFile file) {
@@ -124,7 +129,7 @@ public class AdminVisaServiceImple implements AdminVisaService {
 	@Override
 	public List<Visa> updateEmbassyFees(Long visaId, EmbassyFeesStructure embassyFeesStructure) {
 
-		 Optional<Visa> byId = visaRepo.findById(visaId);
+		Optional<Visa> byId = visaRepo.findById(visaId);
 		if (byId.isEmpty() || embassyFeesStructure == null) {
 			return null;
 		}
@@ -159,6 +164,41 @@ public class AdminVisaServiceImple implements AdminVisaService {
 		}
 
 		return visaRepo.findAll();
+	}
+
+	@Override
+	public List<String> uploadBlog(Blog blog, MultipartFile banner, MultipartFile img1, MultipartFile img2) {
+		// add images first
+
+	    // Uploading the banner image
+	    String bannerImage = fileService.uploadBlogImage(banner);
+	    if (bannerImage != null) {
+	        blog.setBannerImage(bannerImage);
+	    } else {
+	        return null;
+	    }
+
+	    // Uploading the first image
+	    String img1Path = fileService.uploadBlogImage(img1);
+	    if (img1Path != null) {
+	        blog.setImg1(img1Path); // Set img1 correctly
+	    } else {
+	        return null;
+	    }
+
+	    // Uploading the second image
+	    String img2Path = fileService.uploadBlogImage(img2);
+	    if (img2Path != null) {
+	        blog.setImg2(img2Path); // Set img2 correctly
+	    } else {
+	        return null;
+	    }
+
+		
+		blogInterface.save(blog);
+		ArrayList<String> collect = blogInterface.findAll().stream().map(Blog::getCountryName).collect(Collectors.toCollection(ArrayList::new));
+		
+		return collect;
 	}
 
 }
