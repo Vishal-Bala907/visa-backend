@@ -1,24 +1,31 @@
 package com.visa.services.imple;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Base64;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.visa.modals.ImageUpdateDTO;
 import com.visa.modals.Visa;
+import com.visa.repos.VisaRepo;
 
 @Service
 public class FileService {
 
     @Value("${file.upload-dir}")
     private String uploadDir;
+    @Autowired
+    private VisaRepo repo;
 
     public Visa updateOrSaveProfilePic(Visa visa, MultipartFile file) {
         String fileName = file.getOriginalFilename();
@@ -43,6 +50,44 @@ public class FileService {
             e.printStackTrace();
             return null;
         }
+    }
+    
+    
+    // handle base64 image
+    public boolean handleBase64Image(Visa visa , ImageUpdateDTO dto) {
+    	
+    	// base64 image string
+    	String base64 = dto.getImage();
+    	String originalName = dto.getOriginalName();
+    	String savedImageName = Math.random()+ visa.getId() +originalName;
+    	
+    	try {
+    		byte[] image = Base64.getDecoder().decode(base64);
+    		String filePath = uploadDir + File.separator + savedImageName;
+    		
+    		// delete the old image
+    		deleteImageByVisaId(visa.getBannerImage());
+    		
+    		// save the new image path to the db
+    		visa.setBannerImage("images/"+savedImageName);
+    		// save the changes
+    		repo.save(visa);
+    		
+    		try {
+    			FileOutputStream fos = new FileOutputStream(filePath);
+    			fos.write(image);
+    			fos.close();
+    		} catch (Exception e) {
+				e.printStackTrace();
+				return false;
+			}
+    	}
+    	catch (Exception e) {
+    		e.printStackTrace();
+			return false;
+		}
+    	
+    	return true;
     }
     
     

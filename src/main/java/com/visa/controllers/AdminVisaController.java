@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.visa.modals.DocumentType;
+import com.visa.modals.EmbassyFees;
 import com.visa.modals.EmbassyFeesStructure;
 import com.visa.modals.ImageUpdateDTO;
 import com.visa.modals.Visa;
@@ -118,11 +121,43 @@ public class AdminVisaController {
 			return new ResponseEntity<List<Visa>>(List.of(visa), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
+
 	@PutMapping("/update/image")
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	public ResponseEntity<List<Visa>> updateImage(@RequestBody ImageUpdateDTO imageUpdate) {
+
+		List<Visa> updateImage = adminVisaServiceImple.updateImage(imageUpdate);
+		if (updateImage == null) {
+			return new ResponseEntity<List<Visa>>(List.of(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<List<Visa>>(updateImage, HttpStatus.OK);
 		
-		return null;	
+
+	}
+	@PutMapping("/update/fees/{visaId}")
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	public ResponseEntity<List<Visa>> updateFess(@PathVariable Long visaId , @RequestBody EmbassyFeesStructure embassyFeesStructure) {
+		
+		List<Visa> updateEmbassyFees = adminVisaServiceImple.updateEmbassyFees(visaId, embassyFeesStructure);
+		if(updateEmbassyFees == null) {
+			return new ResponseEntity<List<Visa>>(List.of(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		return new ResponseEntity<List<Visa>>(updateEmbassyFees, HttpStatus.OK);
+		
+		
+	}
+	@DeleteMapping("/update/delete/{visaId}")
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	public ResponseEntity<List<Visa>> updateFess(@PathVariable Long visaId) {
+		
+		List<Visa> updateEmbassyFees = adminVisaServiceImple.deleteVisa(visaId);
+		if(updateEmbassyFees == null) {
+			return new ResponseEntity<List<Visa>>(List.of(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		return new ResponseEntity<List<Visa>>(updateEmbassyFees, HttpStatus.OK);
+		
 		
 	}
 
