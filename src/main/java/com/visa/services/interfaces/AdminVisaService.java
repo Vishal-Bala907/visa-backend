@@ -1,5 +1,6 @@
 package com.visa.services.interfaces;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,6 @@ public interface AdminVisaService {
 	public List<Visa> updateImage(ImageUpdateDTO imageUpdateDTO);
 	public List<Visa> updateEmbassyFees(Long visaId , EmbassyFeesStructure embassyFeesStructure);
 	public List<Visa> deleteVisa(Long visaId);
-	public List<String> uploadBlog(Blog blog , MultipartFile banner , MultipartFile img1, MultipartFile img2);
+	public HashSet<String> uploadBlog(Blog blog , MultipartFile banner , MultipartFile img1, MultipartFile img2);
 	
 }

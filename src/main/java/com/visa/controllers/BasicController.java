@@ -1,6 +1,6 @@
 package com.visa.controllers;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.visa.modals.Archive;
 import com.visa.modals.Blog;
+import com.visa.modals.BlogMetaDTO;
 import com.visa.modals.User;
 import com.visa.modals.Visa;
 import com.visa.repos.BlogInterface;
@@ -48,9 +50,9 @@ public class BasicController {
 
 	@GetMapping("/blogs/country-names")
 	@PreAuthorize("hasAnyRole('ADMIN','USER')")
-	public ResponseEntity<List<String>> getAllCountryBlog() {
-		ArrayList<String> collect = blogInterface.findAll().stream().map(Blog::getCountryName)
-				.collect(Collectors.toCollection(ArrayList::new));
+	public ResponseEntity<HashSet<String>> getAllCountryBlog() {
+		HashSet<String> collect = blogInterface.findAll().stream().map(Blog::getCountryName)
+				.collect(Collectors.toCollection(HashSet<String>::new));
 		return ResponseEntity.ok().body(collect);
 	}
 
@@ -71,7 +73,7 @@ public class BasicController {
 		}
 
 		String token = authHeader.substring(7); // Remove "Bearer " prefix
-		System.out.println("Token: " + token);
+//		System.out.println("Token: " + token);
 
 		String mobileNumber = jwtService.extractMobileNumber(token);
 		User user = repository.findByMobileNumber(mobileNumber).get();
@@ -94,6 +96,52 @@ public class BasicController {
 			return new ResponseEntity<User>(user, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<User>(updateUser, HttpStatus.OK);
+	}
+
+	@GetMapping("/blog-meta/{countryName}")
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	public ResponseEntity<List<BlogMetaDTO>> fetchBlogDetailsFirst(@PathVariable String countryName) {
+//		System.out.println(countryName);
+		List<BlogMetaDTO> blogMetaDTO = basicServiceImple.getBlogMetaDTO(countryName);
+		if (blogMetaDTO == null || blogMetaDTO.size() == 0) {
+			return new ResponseEntity<List<BlogMetaDTO>>(List.of(), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<List<BlogMetaDTO>>(blogMetaDTO, HttpStatus.OK);
+
+	}
+
+	@GetMapping("/blog-data/{id}")
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	public ResponseEntity<Blog> findBlog(@PathVariable Long id) {
+		Blog blogById = basicServiceImple.findBlogById(id);
+		if (blogById == null) {
+			return new ResponseEntity<Blog>(new Blog(), HttpStatus.NOT_FOUND);
+		}
+		return new ResponseEntity<Blog>(blogById, HttpStatus.OK);
+
+	}
+
+	@GetMapping("/add-arch/{mobile}/{visaid}")
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	public ResponseEntity<List<Archive>> findBlog(@PathVariable String mobile, @PathVariable Long visaid) {
+		List<Archive> toArchive = basicServiceImple.addToArchive(mobile, visaid);
+		/*
+		 * if (blogById == null) { return new ResponseEntity<Blog>(new Blog(),
+		 * HttpStatus.NOT_FOUND); }
+		 */
+		return new ResponseEntity<List<Archive>>(toArchive, HttpStatus.OK);
+
+	}
+	@GetMapping("/get-arch/{mobile}")
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	public ResponseEntity<List<Archive>> findArchives(@PathVariable String mobile) {
+		List<Archive> toArchive = basicServiceImple.getAllArchives(mobile);
+		/*
+		 * if (blogById == null) { return new ResponseEntity<Blog>(new Blog(),
+		 * HttpStatus.NOT_FOUND); }
+		 */
+		return new ResponseEntity<List<Archive>>(toArchive, HttpStatus.OK);
+		
 	}
 
 }

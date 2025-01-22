@@ -1,6 +1,7 @@
 package com.visa.services.imple;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -167,7 +168,7 @@ public class AdminVisaServiceImple implements AdminVisaService {
 	}
 
 	@Override
-	public List<String> uploadBlog(Blog blog, MultipartFile banner, MultipartFile img1, MultipartFile img2) {
+	public HashSet<String> uploadBlog(Blog blog, MultipartFile banner, MultipartFile img1, MultipartFile img2) {
 		// add images first
 
 	    // Uploading the banner image
@@ -196,7 +197,7 @@ public class AdminVisaServiceImple implements AdminVisaService {
 
 		
 		blogInterface.save(blog);
-		ArrayList<String> collect = blogInterface.findAll().stream().map(Blog::getCountryName).collect(Collectors.toCollection(ArrayList::new));
+		HashSet<String> collect = blogInterface.findAll().stream().map(Blog::getCountryName).collect(Collectors.toCollection(HashSet<String>::new));
 		
 		return collect;
 	}

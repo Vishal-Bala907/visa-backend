@@ -1,5 +1,7 @@
 package com.visa.modals;
 
+import java.time.LocalDate;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,25 +12,19 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Builder
 @ToString
-public class Blog {
-	
+@Builder
+@Entity
+public class Archive {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	private String countryName;
-	private String bannerImage;
-	private String img1;
-	private String img2;
-	private String blogHeading;
-	private String blogDescription;
-	
-//	@Lob
-	public String blogContent;
-
+	private String mobileNumber;
+	private String visaName;
+	private String visaType;
+	private Long visaId;
+	private LocalDate date;
 }

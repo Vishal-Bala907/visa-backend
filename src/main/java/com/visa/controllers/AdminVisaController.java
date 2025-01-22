@@ -1,6 +1,7 @@
 package com.visa.controllers;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -112,19 +113,21 @@ public class AdminVisaController {
 
 	@PostMapping("/add-blog")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<List<String>> addNewBlog(@RequestParam String countryName, @RequestParam String blogHeading,
+	public ResponseEntity<HashSet<String>> addNewBlog(@RequestParam String countryName, @RequestParam String blogHeading,
 			@RequestParam String blogDescription, @RequestParam String blogContent,
 			@RequestParam MultipartFile bannerImage, @RequestParam MultipartFile img1,
 			@RequestParam MultipartFile img2) {
 
 		Blog blog = Blog.builder().countryName(countryName.toLowerCase()).blogHeading(blogHeading).blogDescription(blogDescription)
 				.blogContent(blogContent).build();
-		List<String> uploadBlog = adminVisaServiceImple.uploadBlog(blog, bannerImage, img1, img2);
+		HashSet<String> uploadBlog = adminVisaServiceImple.uploadBlog(blog, bannerImage, img1, img2);
 
 		if (uploadBlog == null) {
-			return new ResponseEntity<List<String>>(List.of(), HttpStatus.CREATED);
+			HashSet<String> set = new HashSet<>();
+			set.add("empty");
+			return new ResponseEntity<HashSet<String>>(set, HttpStatus.CREATED);
 		}
-		return new ResponseEntity<List<String>>(uploadBlog, HttpStatus.CREATED);
+		return new ResponseEntity<HashSet<String>>(uploadBlog, HttpStatus.CREATED);
 	}
 
 	@PutMapping("/update/visa")
