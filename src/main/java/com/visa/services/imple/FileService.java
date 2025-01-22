@@ -32,7 +32,7 @@ public class FileService {
 
 		try (InputStream inputStream = file.getInputStream()) {
 			// Resolve the relative path based on the working directory
-			System.out.println(System.getProperty("user.dir"));
+//			System.out.println(System.getProperty("user.dir"));
 			Path fileSavePath = Paths.get(System.getProperty("user.dir"), uploadDir, visa.getId() + "_" + fileName);
 			File fileDirectory = fileSavePath.getParent().toFile();
 
@@ -50,6 +50,26 @@ public class FileService {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	public String uploadImage(MultipartFile file) {
+		String fileName = file.getOriginalFilename();
+		try (InputStream inputStream = file.getInputStream()) {
+			final String  FILENAME = Math.random()  + Math.random() + "_" + fileName;
+			Path fileSavePath = Paths.get(System.getProperty("user.dir"), uploadDir,FILENAME);
+			File fileDirectory = fileSavePath.getParent().toFile();
+			
+			if(!fileDirectory.exists() && !fileDirectory.mkdirs()) {
+				throw new IOException("Failed to create directory: " + fileDirectory.getAbsolutePath());
+			}
+			
+			Files.copy(inputStream, fileSavePath, StandardCopyOption.REPLACE_EXISTING);
+			return "images/" + FILENAME;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public String uploadBlogImage(MultipartFile file) {

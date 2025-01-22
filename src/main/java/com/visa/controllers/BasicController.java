@@ -11,10 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.visa.modals.Archive;
 import com.visa.modals.Blog;
@@ -23,6 +26,7 @@ import com.visa.modals.User;
 import com.visa.modals.Visa;
 import com.visa.repos.BlogInterface;
 import com.visa.repos.UserRepository;
+import com.visa.services.imple.AdminVisaServiceImple;
 import com.visa.services.imple.BasicServiceImple;
 import com.visa.services.imple.JwtService;
 
@@ -40,6 +44,8 @@ public class BasicController {
 	private UserRepository repository;
 	@Autowired
 	BlogInterface blogInterface;
+	@Autowired
+	AdminVisaServiceImple adminVisaServiceImple;
 
 	@GetMapping("/visas")
 	public ResponseEntity<List<Visa>> getAllVisas() {
@@ -144,4 +150,14 @@ public class BasicController {
 		
 	}
 
+	@PostMapping("/upload/img")
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	public ResponseEntity<String> uploadImage(@RequestParam MultipartFile file) {
+		String uploadImage = adminVisaServiceImple.uploadImage(file);
+		if (uploadImage == null) {
+			return new ResponseEntity<String>("image upload failed", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return new ResponseEntity<String>(uploadImage, HttpStatus.OK);
+	}
 }

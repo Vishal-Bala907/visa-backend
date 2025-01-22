@@ -202,4 +202,13 @@ public class AdminVisaServiceImple implements AdminVisaService {
 		return collect;
 	}
 
+	@Override
+	public String uploadImage(MultipartFile file) {
+		String uploadImage = fileService.uploadImage(file);
+		if(uploadImage == null) {
+			return null;
+		}
+		return uploadImage;
+	}
+
 }

@@ -2,6 +2,8 @@ package com.visa.services.imple;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -102,24 +104,29 @@ public class BasicServiceImple implements BasicService {
 	public List<Archive> addToArchive(String mobileNumber, Long visaId) {
 		Archive byMobileNumberAndVisaId = archiveRepo.findByMobileNumberAndVisaId(mobileNumber, visaId);
 		Visa visa = visaRepo.findById(visaId).get();
+		final Long timestamp = new Date().getTime();
 		if (byMobileNumberAndVisaId == null) {
 			Archive archive = Archive.builder().date(LocalDate.now()).visaName(visa.getCountyName())
-					.visaType(visa.getVisaType()).mobileNumber(mobileNumber).visaId(visaId).build();
+					.visaType(visa.getVisaType()).mobileNumber(mobileNumber).timestamp(timestamp).visaId(visaId).build();
 			archiveRepo.save(archive);
 			return archiveRepo.findByMobileNumber(mobileNumber);
 		} else {
 			byMobileNumberAndVisaId.setDate(LocalDate.now());
+			byMobileNumberAndVisaId.setTimestamp(timestamp);
 			archiveRepo.save(byMobileNumberAndVisaId);
-			return archiveRepo.findByMobileNumber(mobileNumber);
+			List<Archive> list = archiveRepo.findByMobileNumber(mobileNumber).stream().sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
+			return list;
 		}
 	}
 
 	@Override
 	public List<Archive> getAllArchives(String mobileNumber) {
 		if(mobileNumber.equals("112233")) {
-			return archiveRepo.findAll();
+			 List<Archive> list = archiveRepo.findAll().stream().sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
+			 return list;
 		}
-		return archiveRepo.findByMobileNumber(mobileNumber);
+		List<Archive> list = archiveRepo.findByMobileNumber(mobileNumber).stream().sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
+		return list;
 	}
 
 }

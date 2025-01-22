@@ -18,5 +18,6 @@ public interface AdminVisaService {
 	public List<Visa> updateEmbassyFees(Long visaId , EmbassyFeesStructure embassyFeesStructure);
 	public List<Visa> deleteVisa(Long visaId);
 	public HashSet<String> uploadBlog(Blog blog , MultipartFile banner , MultipartFile img1, MultipartFile img2);
+	public String uploadImage(MultipartFile file);
 	
 }

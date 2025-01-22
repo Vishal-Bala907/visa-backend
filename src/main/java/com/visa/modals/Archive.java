@@ -27,4 +27,5 @@ public class Archive {
 	private String visaType;
 	private Long visaId;
 	private LocalDate date;
+	private Long timestamp;
 }

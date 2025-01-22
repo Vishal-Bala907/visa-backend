@@ -180,5 +180,7 @@ public class AdminVisaController {
 		return new ResponseEntity<List<Visa>>(updateEmbassyFees, HttpStatus.OK);
 
 	}
+	
+	
 
 }
