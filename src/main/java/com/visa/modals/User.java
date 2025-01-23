@@ -1,10 +1,14 @@
 package com.visa.modals;
 
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
@@ -38,8 +42,11 @@ public class User {
     @Email(message = "please enter a valid email")
     private String email;
 
-   @Column(nullable = false)
+    @Column(nullable = false)
     private String role;
+    
+//    @OneToMany(cascade = CascadeType.ALL)
+//    private List<VisaRequestMain> visaRequestMains;
 
 
 }

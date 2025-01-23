@@ -36,7 +36,7 @@ public class SecurityConfig {
 		httpSecurity.authorizeHttpRequests(auth -> 
 		auth.requestMatchers("/api/v1/auth/**","/visa/**","/images/**")
 				.permitAll()
-				.requestMatchers(HttpMethod.OPTIONS, "/admin/visa/**", "/data/**").permitAll()
+				.requestMatchers(HttpMethod.OPTIONS, "/admin/visa/**", "/data/**","/payment/**").permitAll()
 				.anyRequest().authenticated())
 		  .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 		  .exceptionHandling((exceptions)-> exceptions

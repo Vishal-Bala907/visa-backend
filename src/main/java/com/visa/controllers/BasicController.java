@@ -24,6 +24,7 @@ import com.visa.modals.Blog;
 import com.visa.modals.BlogMetaDTO;
 import com.visa.modals.User;
 import com.visa.modals.Visa;
+import com.visa.modals.VisaRequestMain;
 import com.visa.repos.BlogInterface;
 import com.visa.repos.UserRepository;
 import com.visa.services.imple.AdminVisaServiceImple;
@@ -159,5 +160,13 @@ public class BasicController {
 		}
 
 		return new ResponseEntity<String>(uploadImage, HttpStatus.OK);
+	}
+	
+	@PostMapping("/sumbit/visa/{phone}")
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	public ResponseEntity<String> submitVisaApplication(@PathVariable String phone ,  @RequestBody VisaRequestMain visaRequest2) {
+		System.out.println(phone);
+		System.out.println(visaRequest2);
+		return null;
 	}
 }

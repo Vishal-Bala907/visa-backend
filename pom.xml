@@ -92,6 +92,15 @@
 			<artifactId>jjwt-jackson</artifactId>
 			<version>0.11.5</version>
 		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/com.razorpay/razorpay-java -->
+		<dependency>
+		    <groupId>com.razorpay</groupId>
+		    <artifactId>razorpay-java</artifactId>
+		    <version>1.4.8</version>
+		</dependency>
+
+
 	</dependencies>
 
 	<build>

@@ -8,6 +8,7 @@ import com.visa.modals.Blog;
 import com.visa.modals.BlogMetaDTO;
 import com.visa.modals.User;
 import com.visa.modals.Visa;
+import com.visa.modals.VisaRequestMain;
 
 public interface BasicService {
 	List<Visa> getAllVisas();
@@ -18,4 +19,5 @@ public interface BasicService {
 	Blog findBlogById(Long id);
 	List<Archive> addToArchive(String mobileNumber , Long visaId);
 	List<Archive> getAllArchives(String mobileNumber);
+	String submitVisaApplication(String number, VisaRequestMain main);
 }

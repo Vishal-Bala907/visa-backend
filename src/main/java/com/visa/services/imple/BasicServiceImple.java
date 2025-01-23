@@ -18,10 +18,12 @@ import com.visa.modals.Blog;
 import com.visa.modals.BlogMetaDTO;
 import com.visa.modals.User;
 import com.visa.modals.Visa;
+import com.visa.modals.VisaRequestMain;
 import com.visa.repos.ArchiveRepo;
 import com.visa.repos.BlogInterface;
 import com.visa.repos.UserRepository;
 import com.visa.repos.VisaRepo;
+import com.visa.repos.VisaRequestMainRepo;
 import com.visa.services.interfaces.BasicService;
 
 @Service
@@ -35,6 +37,8 @@ public class BasicServiceImple implements BasicService {
 	private BlogInterface blogInterface;
 	@Autowired
 	private ArchiveRepo archiveRepo;
+	@Autowired
+	private VisaRequestMainRepo visaRequestMainRepo;
 
 	@Override
 	public List<Visa> getAllVisas() {
@@ -127,6 +131,26 @@ public class BasicServiceImple implements BasicService {
 		}
 		List<Archive> list = archiveRepo.findByMobileNumber(mobileNumber).stream().sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
 		return list;
+	}
+
+	@Override
+	public String submitVisaApplication(String number, VisaRequestMain main) {
+		final Long timestamp = new Date().getTime();
+		main.setMobileNumber(number);
+		main.setTimestamp(timestamp);
+		main.setPaymentStatus(false);
+		main.setCompletionStatus(false);
+		if(main.getAppointmentDetails() == null) {
+			main.setAppointmentDetails("N/R");
+		}
+		try {
+			visaRequestMainRepo.save(main);
+			return " Saved ...";
+		}catch (Exception e) {
+			e.printStackTrace();
+			return "Not Saved ...";
+		}
+
 	}
 
 }
