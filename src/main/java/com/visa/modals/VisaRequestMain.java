@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -30,11 +31,15 @@ public class VisaRequestMain {
 	private String appointmentDetails;
 	private String purposeOfVisit;
 	private String mobileNumber;
+	@OneToOne
+	private Visa visa;
 	
 	//
 	private Boolean completionStatus;
 	private Boolean paymentStatus;
 	private Long timestamp;
+	private String paymentId;
+	
 	
 	@OneToMany(cascade = CascadeType.ALL)
 	private List<VisaRequest> visaRequest;

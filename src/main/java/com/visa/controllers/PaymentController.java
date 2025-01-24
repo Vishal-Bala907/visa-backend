@@ -1,6 +1,7 @@
 package com.visa.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,12 +32,14 @@ public class PaymentController {
 		}
 
 	}
+
 	@PostMapping("/make-order")
 	@PreAuthorize("hasAnyRole('ADMIN','USER')")
 	public ResponseEntity<String> createOrder(@RequestBody PaymentDetails details) {
 //		int amt = (int) amount;
 		System.out.println(details);
-		return null;
+		String handlePayment = paymentService.handlePayment(details);
+		return new ResponseEntity<String>(handlePayment, HttpStatus.OK);
 	}
 
 }

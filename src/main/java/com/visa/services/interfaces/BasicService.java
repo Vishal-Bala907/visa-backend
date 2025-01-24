@@ -19,5 +19,6 @@ public interface BasicService {
 	Blog findBlogById(Long id);
 	List<Archive> addToArchive(String mobileNumber , Long visaId);
 	List<Archive> getAllArchives(String mobileNumber);
-	String submitVisaApplication(String number, VisaRequestMain main);
+	String submitVisaApplication(String number, VisaRequestMain main, Long visaId);
+	List<VisaRequestMain> getVisaHistory(String number);
 }

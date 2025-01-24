@@ -21,10 +21,13 @@ import com.visa.modals.Visa;
 import com.visa.modals.VisaRequestMain;
 import com.visa.repos.ArchiveRepo;
 import com.visa.repos.BlogInterface;
+import com.visa.repos.PaymentRepo;
 import com.visa.repos.UserRepository;
 import com.visa.repos.VisaRepo;
 import com.visa.repos.VisaRequestMainRepo;
 import com.visa.services.interfaces.BasicService;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class BasicServiceImple implements BasicService {
@@ -39,6 +42,8 @@ public class BasicServiceImple implements BasicService {
 	private ArchiveRepo archiveRepo;
 	@Autowired
 	private VisaRequestMainRepo visaRequestMainRepo;
+	@Autowired
+	private PaymentRepo paymentRepo;
 
 	@Override
 	public List<Visa> getAllVisas() {
@@ -84,6 +89,7 @@ public class BasicServiceImple implements BasicService {
 
 	}
 
+	@Transactional
 	@Override
 	public List<BlogMetaDTO> getBlogMetaDTO(String countryName) {
 		ArrayList<BlogMetaDTO> collect = blogInterface.findByCountryName(countryName).stream().map(blog -> {
@@ -111,46 +117,65 @@ public class BasicServiceImple implements BasicService {
 		final Long timestamp = new Date().getTime();
 		if (byMobileNumberAndVisaId == null) {
 			Archive archive = Archive.builder().date(LocalDate.now()).visaName(visa.getCountyName())
-					.visaType(visa.getVisaType()).mobileNumber(mobileNumber).timestamp(timestamp).visaId(visaId).build();
+					.visaType(visa.getVisaType()).mobileNumber(mobileNumber).timestamp(timestamp).visaId(visaId)
+					.build();
 			archiveRepo.save(archive);
 			return archiveRepo.findByMobileNumber(mobileNumber);
 		} else {
 			byMobileNumberAndVisaId.setDate(LocalDate.now());
 			byMobileNumberAndVisaId.setTimestamp(timestamp);
 			archiveRepo.save(byMobileNumberAndVisaId);
-			List<Archive> list = archiveRepo.findByMobileNumber(mobileNumber).stream().sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
+			List<Archive> list = archiveRepo.findByMobileNumber(mobileNumber).stream()
+					.sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
 			return list;
 		}
 	}
 
 	@Override
 	public List<Archive> getAllArchives(String mobileNumber) {
-		if(mobileNumber.equals("112233")) {
-			 List<Archive> list = archiveRepo.findAll().stream().sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
-			 return list;
+		if (mobileNumber.equals("112233")) {
+			List<Archive> list = archiveRepo.findAll().stream()
+					.sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
+			return list;
 		}
-		List<Archive> list = archiveRepo.findByMobileNumber(mobileNumber).stream().sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
+		List<Archive> list = archiveRepo.findByMobileNumber(mobileNumber).stream()
+				.sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
 		return list;
 	}
 
 	@Override
-	public String submitVisaApplication(String number, VisaRequestMain main) {
+	public String submitVisaApplication(String number, VisaRequestMain main, Long visaId) {
 		final Long timestamp = new Date().getTime();
 		main.setMobileNumber(number);
 		main.setTimestamp(timestamp);
 		main.setPaymentStatus(false);
 		main.setCompletionStatus(false);
-		if(main.getAppointmentDetails() == null) {
+		main.setPaymentId("0");
+		
+		// fetch the visa
+		Optional<Visa> byId = visaRepo.findById(visaId);
+		if(byId.isEmpty()) {
+			return null;
+		}
+		main.setVisa(byId.get());
+
+		if (main.getAppointmentDetails() == null) {
 			main.setAppointmentDetails("N/R");
 		}
 		try {
-			visaRequestMainRepo.save(main);
-			return " Saved ...";
-		}catch (Exception e) {
+			VisaRequestMain save = visaRequestMainRepo.save(main);
+			return save.getId().toString();
+		} catch (Exception e) {
 			e.printStackTrace();
-			return "Not Saved ...";
+			return null;
 		}
 
+	}
+
+	@Override
+	public List<VisaRequestMain> getVisaHistory(String number) {
+		List<VisaRequestMain> byMobileNumber = visaRequestMainRepo.findByMobileNumber(number);
+		return byMobileNumber;
 	}
 
 }

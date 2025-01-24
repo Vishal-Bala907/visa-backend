@@ -17,7 +17,7 @@ import lombok.ToString;
 @ToString
 @Builder
 public class PaymentDetails {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
@@ -27,5 +27,7 @@ public class PaymentDetails {
 	private Long amount;
 	private Long visaReqId;
 	private String mobileNumber;
-	
+	private Long timestamp;
+	private Long reqId;
+
 }

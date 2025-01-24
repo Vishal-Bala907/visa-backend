@@ -1,9 +1,11 @@
 package com.visa.modals;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,7 +30,8 @@ public class Blog {
 	private String blogHeading;
 	private String blogDescription;
 	
-//	@Lob
+	@Lob
+	@Column(columnDefinition = "TEXT")
 	public String blogContent;
 
 }

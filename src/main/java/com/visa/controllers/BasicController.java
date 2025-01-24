@@ -32,6 +32,7 @@ import com.visa.services.imple.BasicServiceImple;
 import com.visa.services.imple.JwtService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("/data")
@@ -107,6 +108,7 @@ public class BasicController {
 
 	@GetMapping("/blog-meta/{countryName}")
 	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	@Transactional
 	public ResponseEntity<List<BlogMetaDTO>> fetchBlogDetailsFirst(@PathVariable String countryName) {
 //		System.out.println(countryName);
 		List<BlogMetaDTO> blogMetaDTO = basicServiceImple.getBlogMetaDTO(countryName);
@@ -139,6 +141,7 @@ public class BasicController {
 		return new ResponseEntity<List<Archive>>(toArchive, HttpStatus.OK);
 
 	}
+
 	@GetMapping("/get-arch/{mobile}")
 	@PreAuthorize("hasAnyRole('ADMIN','USER')")
 	public ResponseEntity<List<Archive>> findArchives(@PathVariable String mobile) {
@@ -148,7 +151,7 @@ public class BasicController {
 		 * HttpStatus.NOT_FOUND); }
 		 */
 		return new ResponseEntity<List<Archive>>(toArchive, HttpStatus.OK);
-		
+
 	}
 
 	@PostMapping("/upload/img")
@@ -161,12 +164,25 @@ public class BasicController {
 
 		return new ResponseEntity<String>(uploadImage, HttpStatus.OK);
 	}
-	
-	@PostMapping("/sumbit/visa/{phone}")
+
+	@PostMapping("/sumbit/visa/{phone}/{visaId}")
 	@PreAuthorize("hasAnyRole('ADMIN','USER')")
-	public ResponseEntity<String> submitVisaApplication(@PathVariable String phone ,  @RequestBody VisaRequestMain visaRequest2) {
+	public ResponseEntity<String> submitVisaApplication(@PathVariable Long visaId, @PathVariable String phone,
+			@RequestBody VisaRequestMain visaRequest2) {
+//		System.out.println(visaRequest2);
+		String submitVisaApplication = basicServiceImple.submitVisaApplication(phone, visaRequest2,visaId);
+		if(submitVisaApplication == null) {
+			return new ResponseEntity<String>("error", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<String>(submitVisaApplication, HttpStatus.OK);
+	}
+
+	@GetMapping("/get/visa-history/{phone}")
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	public ResponseEntity<List<VisaRequestMain>> submitVisaApplication(@PathVariable String phone) {
+//		String submitVisaApplication = basicServiceImple.submitVisaApplication(phone, visaRequest2);
 		System.out.println(phone);
-		System.out.println(visaRequest2);
-		return null;
+		List<VisaRequestMain> data = basicServiceImple.getVisaHistory(phone);
+		return new ResponseEntity<List<VisaRequestMain>>(data, HttpStatus.OK);
 	}
 }
