@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.visa.modals.Blog;
@@ -21,7 +22,7 @@ public interface AdminVisaService {
 	public List<Visa> deleteVisa(Long visaId);
 	public HashSet<String> uploadBlog(Blog blog , MultipartFile banner , MultipartFile img1, MultipartFile img2);
 	public String uploadImage(MultipartFile file);
-	public List<VisaRequestMain> getAllVisaHistory();
+	public Page<VisaRequestMain> getAllVisaHistory(int size , int page);
 	public Map<String,  Map<String,Long>> getVisaNameAndQt();
 	public Map<String,  Map<String,Long>> getVisaNameAndIncome();
 	public Map<String,  Map<String,Long>> getDatabyDate(String date);

@@ -11,6 +11,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.visa.modals.Archive;
@@ -132,16 +137,27 @@ public class BasicServiceImple implements BasicService {
 	}
 
 	@Override
-	public List<Archive> getAllArchives(String mobileNumber) {
-		if (mobileNumber.equals("112233")) {
-			List<Archive> list = archiveRepo.findAll().stream()
-					.sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
-			return list;
+	public Page<Archive> getAllArchives(String mobileNumber, int size, int page) {
+		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("timestamp")));
+
+		if ("112233".equals(mobileNumber)) {
+			return archiveRepo.findAll(pageable); // The sorting will be handled by the database query
+		} else {
+			return archiveRepo.findByMobileNumber(mobileNumber, pageable);
 		}
-		List<Archive> list = archiveRepo.findByMobileNumber(mobileNumber).stream()
-				.sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
-		return list;
 	}
+
+//	@Override
+//	public List<Archive> getAllArchives(String mobileNumber) {
+//		if (mobileNumber.equals("112233")) {
+//			List<Archive> list = archiveRepo.findAll().stream()
+//					.sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
+//			return list;
+//		}
+//		List<Archive> list = archiveRepo.findByMobileNumber(mobileNumber).stream()
+//				.sorted(Comparator.comparing(Archive::getTimestamp).reversed()).toList();
+//		return list;
+//	}
 
 	@Override
 	public String submitVisaApplication(String number, VisaRequestMain main, Long visaId) {
@@ -151,10 +167,10 @@ public class BasicServiceImple implements BasicService {
 		main.setPaymentStatus(false);
 		main.setCompletionStatus(false);
 		main.setPaymentId("0");
-		
+
 		// fetch the visa
 		Optional<Visa> byId = visaRepo.findById(visaId);
-		if(byId.isEmpty()) {
+		if (byId.isEmpty()) {
 			return null;
 		}
 		main.setVisa(byId.get());
@@ -163,6 +179,7 @@ public class BasicServiceImple implements BasicService {
 			main.setAppointmentDetails("N/R");
 		}
 		try {
+			System.out.println("heelo");
 			VisaRequestMain save = visaRequestMainRepo.save(main);
 			return save.getId().toString();
 		} catch (Exception e) {
@@ -173,8 +190,9 @@ public class BasicServiceImple implements BasicService {
 	}
 
 	@Override
-	public List<VisaRequestMain> getVisaHistory(String number) {
-		List<VisaRequestMain> byMobileNumber = visaRequestMainRepo.findByMobileNumber(number);
+	public Page<VisaRequestMain> getVisaHistory(String number, int size, int page) {
+		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("timestamp")));
+		Page<VisaRequestMain> byMobileNumber = visaRequestMainRepo.findByMobileNumber(number, pageable);
 		return byMobileNumber;
 	}
 

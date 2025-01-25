@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -134,24 +135,17 @@ public class BasicController {
 	@PreAuthorize("hasAnyRole('ADMIN','USER')")
 	public ResponseEntity<List<Archive>> findBlog(@PathVariable String mobile, @PathVariable Long visaid) {
 		List<Archive> toArchive = basicServiceImple.addToArchive(mobile, visaid);
-		/*
-		 * if (blogById == null) { return new ResponseEntity<Blog>(new Blog(),
-		 * HttpStatus.NOT_FOUND); }
-		 */
 		return new ResponseEntity<List<Archive>>(toArchive, HttpStatus.OK);
 
 	}
 
 	@GetMapping("/get-arch/{mobile}")
 	@PreAuthorize("hasAnyRole('ADMIN','USER')")
-	public ResponseEntity<List<Archive>> findArchives(@PathVariable String mobile) {
-		List<Archive> toArchive = basicServiceImple.getAllArchives(mobile);
-		/*
-		 * if (blogById == null) { return new ResponseEntity<Blog>(new Blog(),
-		 * HttpStatus.NOT_FOUND); }
-		 */
-		return new ResponseEntity<List<Archive>>(toArchive, HttpStatus.OK);
+	public ResponseEntity<Page<Archive>> findArchives(@PathVariable String mobile,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
+		Page<Archive> toArchive = basicServiceImple.getAllArchives(mobile, size, page);
 
+		return new ResponseEntity<>(toArchive, HttpStatus.OK);
 	}
 
 	@PostMapping("/upload/img")
@@ -170,8 +164,8 @@ public class BasicController {
 	public ResponseEntity<String> submitVisaApplication(@PathVariable Long visaId, @PathVariable String phone,
 			@RequestBody VisaRequestMain visaRequest2) {
 //		System.out.println(visaRequest2);
-		String submitVisaApplication = basicServiceImple.submitVisaApplication(phone, visaRequest2,visaId);
-		if(submitVisaApplication == null) {
+		String submitVisaApplication = basicServiceImple.submitVisaApplication(phone, visaRequest2, visaId);
+		if (submitVisaApplication == null) {
 			return new ResponseEntity<String>("error", HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<String>(submitVisaApplication, HttpStatus.OK);
@@ -179,10 +173,10 @@ public class BasicController {
 
 	@GetMapping("/get/visa-history/{phone}")
 	@PreAuthorize("hasAnyRole('ADMIN','USER')")
-	public ResponseEntity<List<VisaRequestMain>> submitVisaApplication(@PathVariable String phone) {
+	public ResponseEntity<Page<VisaRequestMain>> submitVisaApplication(@PathVariable String phone,
+			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 //		String submitVisaApplication = basicServiceImple.submitVisaApplication(phone, visaRequest2);
-		System.out.println(phone);
-		List<VisaRequestMain> data = basicServiceImple.getVisaHistory(phone);
-		return new ResponseEntity<List<VisaRequestMain>>(data, HttpStatus.OK);
+		Page<VisaRequestMain> data = basicServiceImple.getVisaHistory(phone, size, page);
+		return new ResponseEntity<Page<VisaRequestMain>>(data, HttpStatus.OK);
 	}
 }

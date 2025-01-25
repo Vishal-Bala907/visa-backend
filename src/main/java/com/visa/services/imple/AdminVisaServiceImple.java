@@ -13,6 +13,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -230,9 +234,11 @@ public class AdminVisaServiceImple implements AdminVisaService {
 	}
 
 	@Override
-	public List<VisaRequestMain> getAllVisaHistory() {
-		List<VisaRequestMain> list = visaRequestMainRepo.findAll().stream()
-				.sorted(Comparator.comparing(VisaRequestMain::getTimestamp).reversed()).toList();
+	public Page<VisaRequestMain> getAllVisaHistory(int size, int page) {
+
+		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Order.desc("timestamp")));
+
+		Page<VisaRequestMain> list = visaRequestMainRepo.findAll(pageable);
 		return list;
 	}
 

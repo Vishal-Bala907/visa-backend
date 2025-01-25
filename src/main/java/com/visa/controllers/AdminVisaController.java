@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -185,9 +186,10 @@ public class AdminVisaController {
 
 	@GetMapping("/get/visa-history")
 	@PreAuthorize("hasAnyRole('ADMIN')")
-	public ResponseEntity<List<VisaRequestMain>> submitVisaApplication() {
-		List<VisaRequestMain> data = adminVisaServiceImple.getAllVisaHistory();
-		return new ResponseEntity<List<VisaRequestMain>>(data, HttpStatus.OK);
+	public ResponseEntity<Page<VisaRequestMain>> submitVisaApplication(@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size) {
+		Page<VisaRequestMain> data = adminVisaServiceImple.getAllVisaHistory(size, page);
+		return new ResponseEntity<Page<VisaRequestMain>>(data, HttpStatus.OK);
 	}
 
 	@GetMapping("/get/visa-qt-data")
@@ -196,13 +198,14 @@ public class AdminVisaController {
 		Map<String, Map<String, Long>> visaNameAndQt = adminVisaServiceImple.getVisaNameAndQt();
 		return new ResponseEntity<Map<String, Map<String, Long>>>(visaNameAndQt, HttpStatus.OK);
 	}
+
 	@GetMapping("/get/visa-icm-data")
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	public ResponseEntity<Map<String, Map<String, Long>>> getPrevVisaIcmData() {
 		Map<String, Map<String, Long>> visaNameAndQt = adminVisaServiceImple.getVisaNameAndIncome();
 		return new ResponseEntity<Map<String, Map<String, Long>>>(visaNameAndQt, HttpStatus.OK);
 	}
-	
+
 	@GetMapping("/get/visa-data-date/{date}")
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	public ResponseEntity<Map<String, Map<String, Long>>> getDataByDate(@PathVariable String date) {
