@@ -3,6 +3,7 @@ package com.visa.controllers;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -27,6 +28,7 @@ import com.visa.modals.DocumentType;
 import com.visa.modals.EmbassyFeesStructure;
 import com.visa.modals.ImageUpdateDTO;
 import com.visa.modals.Visa;
+import com.visa.modals.VisaRequestMain;
 import com.visa.modals.VisaType;
 import com.visa.repos.DocumentTypeRepo;
 import com.visa.repos.VisaTypeInterface;
@@ -113,13 +115,13 @@ public class AdminVisaController {
 
 	@PostMapping("/add-blog")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<HashSet<String>> addNewBlog(@RequestParam String countryName, @RequestParam String blogHeading,
-			@RequestParam String blogDescription, @RequestParam String blogContent,
+	public ResponseEntity<HashSet<String>> addNewBlog(@RequestParam String countryName,
+			@RequestParam String blogHeading, @RequestParam String blogDescription, @RequestParam String blogContent,
 			@RequestParam MultipartFile bannerImage, @RequestParam MultipartFile img1,
 			@RequestParam MultipartFile img2) {
 
-		Blog blog = Blog.builder().countryName(countryName.toLowerCase()).blogHeading(blogHeading).blogDescription(blogDescription)
-				.blogContent(blogContent).build();
+		Blog blog = Blog.builder().countryName(countryName.toLowerCase()).blogHeading(blogHeading)
+				.blogDescription(blogDescription).blogContent(blogContent).build();
 		HashSet<String> uploadBlog = adminVisaServiceImple.uploadBlog(blog, bannerImage, img1, img2);
 
 		if (uploadBlog == null) {
@@ -180,7 +182,33 @@ public class AdminVisaController {
 		return new ResponseEntity<List<Visa>>(updateEmbassyFees, HttpStatus.OK);
 
 	}
+
+	@GetMapping("/get/visa-history")
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	public ResponseEntity<List<VisaRequestMain>> submitVisaApplication() {
+		List<VisaRequestMain> data = adminVisaServiceImple.getAllVisaHistory();
+		return new ResponseEntity<List<VisaRequestMain>>(data, HttpStatus.OK);
+	}
+
+	@GetMapping("/get/visa-qt-data")
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	public ResponseEntity<Map<String, Map<String, Long>>> getPrevVisaQtData() {
+		Map<String, Map<String, Long>> visaNameAndQt = adminVisaServiceImple.getVisaNameAndQt();
+		return new ResponseEntity<Map<String, Map<String, Long>>>(visaNameAndQt, HttpStatus.OK);
+	}
+	@GetMapping("/get/visa-icm-data")
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	public ResponseEntity<Map<String, Map<String, Long>>> getPrevVisaIcmData() {
+		Map<String, Map<String, Long>> visaNameAndQt = adminVisaServiceImple.getVisaNameAndIncome();
+		return new ResponseEntity<Map<String, Map<String, Long>>>(visaNameAndQt, HttpStatus.OK);
+	}
 	
-	
+	@GetMapping("/get/visa-data-date/{date}")
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	public ResponseEntity<Map<String, Map<String, Long>>> getDataByDate(@PathVariable String date) {
+
+		Map<String, Map<String, Long>> visaNameAndQt = adminVisaServiceImple.getDatabyDate(date);
+		return new ResponseEntity<Map<String, Map<String, Long>>>(visaNameAndQt, HttpStatus.OK);
+	}
 
 }

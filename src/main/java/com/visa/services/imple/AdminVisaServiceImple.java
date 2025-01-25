@@ -1,8 +1,14 @@
 package com.visa.services.imple;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -15,9 +21,13 @@ import com.visa.modals.CountryName;
 import com.visa.modals.EmbassyFeesStructure;
 import com.visa.modals.ImageUpdateDTO;
 import com.visa.modals.Visa;
+import com.visa.modals.VisaRequestMain;
+import com.visa.modals.VisaType;
 import com.visa.repos.BlogInterface;
 import com.visa.repos.CountryNameRepo;
 import com.visa.repos.VisaRepo;
+import com.visa.repos.VisaRequestMainRepo;
+import com.visa.repos.VisaTypeInterface;
 import com.visa.services.interfaces.AdminVisaService;
 
 @Service
@@ -33,6 +43,14 @@ public class AdminVisaServiceImple implements AdminVisaService {
 	private CountryNameRepo countryNameRepo;
 	@Autowired
 	private BlogInterface blogInterface;
+	@Autowired
+	private VisaRequestMainRepo visaRequestMainRepo;
+	@Autowired
+	private VisaTypeInterface vtInterface;
+	@Autowired
+	private ChartDataService chartDataService;
+	@Autowired
+	private DateService dateService;
 
 	@Override
 	public boolean addNewVisa(Visa visa, MultipartFile file) {
@@ -171,44 +189,149 @@ public class AdminVisaServiceImple implements AdminVisaService {
 	public HashSet<String> uploadBlog(Blog blog, MultipartFile banner, MultipartFile img1, MultipartFile img2) {
 		// add images first
 
-	    // Uploading the banner image
-	    String bannerImage = fileService.uploadBlogImage(banner);
-	    if (bannerImage != null) {
-	        blog.setBannerImage(bannerImage);
-	    } else {
-	        return null;
-	    }
+		// Uploading the banner image
+		String bannerImage = fileService.uploadBlogImage(banner);
+		if (bannerImage != null) {
+			blog.setBannerImage(bannerImage);
+		} else {
+			return null;
+		}
 
-	    // Uploading the first image
-	    String img1Path = fileService.uploadBlogImage(img1);
-	    if (img1Path != null) {
-	        blog.setImg1(img1Path); // Set img1 correctly
-	    } else {
-	        return null;
-	    }
+		// Uploading the first image
+		String img1Path = fileService.uploadBlogImage(img1);
+		if (img1Path != null) {
+			blog.setImg1(img1Path); // Set img1 correctly
+		} else {
+			return null;
+		}
 
-	    // Uploading the second image
-	    String img2Path = fileService.uploadBlogImage(img2);
-	    if (img2Path != null) {
-	        blog.setImg2(img2Path); // Set img2 correctly
-	    } else {
-	        return null;
-	    }
+		// Uploading the second image
+		String img2Path = fileService.uploadBlogImage(img2);
+		if (img2Path != null) {
+			blog.setImg2(img2Path); // Set img2 correctly
+		} else {
+			return null;
+		}
 
-		
 		blogInterface.save(blog);
-		HashSet<String> collect = blogInterface.findAll().stream().map(Blog::getCountryName).collect(Collectors.toCollection(HashSet<String>::new));
-		
+		HashSet<String> collect = blogInterface.findAll().stream().map(Blog::getCountryName)
+				.collect(Collectors.toCollection(HashSet<String>::new));
+
 		return collect;
 	}
 
 	@Override
 	public String uploadImage(MultipartFile file) {
 		String uploadImage = fileService.uploadImage(file);
-		if(uploadImage == null) {
+		if (uploadImage == null) {
 			return null;
 		}
 		return uploadImage;
+	}
+
+	@Override
+	public List<VisaRequestMain> getAllVisaHistory() {
+		List<VisaRequestMain> list = visaRequestMainRepo.findAll().stream()
+				.sorted(Comparator.comparing(VisaRequestMain::getTimestamp).reversed()).toList();
+		return list;
+	}
+
+	@Override
+	public Map<String, Map<String, Long>> getVisaNameAndQt() {
+
+		Map<String, Map<String, Long>> map = new HashMap<>();
+		final Long timestamp = new Date().getTime();
+
+		List<VisaType> all = vtInterface.findAll();
+		if (all.isEmpty()) {
+			Map<String, Long> emap = new HashMap<>();
+			emap.put("Empty", 0L);
+			map.put("EMPTY", emap);
+			return map;
+		}
+
+		List<VisaRequestMain> week = visaRequestMainRepo.findByTimeRange(dateService.getPrevWeekTimestamp(), timestamp);
+		List<VisaRequestMain> month = visaRequestMainRepo.findByTimeRange(dateService.getPrevMonthTimestamp(),
+				timestamp);
+		List<VisaRequestMain> year = visaRequestMainRepo.findByTimeRange(dateService.getPrevYearTimestamp(), timestamp);
+
+		Map<String, Long> dataAccordingToSevenDays = chartDataService.getDataAccordingToDays(week);
+		Map<String, Long> dataAccordingTo30Days = chartDataService.getDataAccordingToDays(month);
+		Map<String, Long> dataAccordingTo365Days = chartDataService.getDataAccordingToDays(year);
+
+		map.put("week", dataAccordingToSevenDays);
+		map.put("month", dataAccordingTo30Days);
+		map.put("year", dataAccordingTo365Days);
+
+		return map;
+	}
+
+	@Override
+	public Map<String, Map<String, Long>> getVisaNameAndIncome() {
+		Map<String, Map<String, Long>> map = new HashMap<>();
+		final Long timestamp = new Date().getTime();
+
+		List<VisaType> all = vtInterface.findAll();
+		if (all.isEmpty()) {
+			Map<String, Long> emap = new HashMap<>();
+			emap.put("Empty", 0L);
+			map.put("EMPTY", emap);
+			return map;
+		}
+
+		List<VisaRequestMain> week = visaRequestMainRepo.findByTimeRange(dateService.getPrevWeekTimestamp(), timestamp);
+		List<VisaRequestMain> month = visaRequestMainRepo.findByTimeRange(dateService.getPrevMonthTimestamp(),
+				timestamp);
+		List<VisaRequestMain> year = visaRequestMainRepo.findByTimeRange(dateService.getPrevYearTimestamp(), timestamp);
+
+		Map<String, Long> dataAccordingToSevenDays = chartDataService.getIncomeAccordingToDays(week);
+		Map<String, Long> dataAccordingTo30Days = chartDataService.getIncomeAccordingToDays(month);
+		Map<String, Long> dataAccordingTo365Days = chartDataService.getIncomeAccordingToDays(year);
+
+		map.put("week", dataAccordingToSevenDays);
+		map.put("month", dataAccordingTo30Days);
+		map.put("year", dataAccordingTo365Days);
+
+		return map;
+	}
+
+	@Override
+	public Map<String, Map<String, Long>> getDatabyDate(String date) {
+		LocalDate localDate = LocalDate.parse(date);
+
+		// Define the timezone for conversion
+		ZoneId zoneId = ZoneId.systemDefault();
+
+		// Get 12:00 AM timestamp
+		long startOfDay = localDate.atStartOfDay(zoneId).toInstant().toEpochMilli();
+
+		// Get 11:59 PM timestamp
+		long endOfDay = localDate.atTime(23, 59, 59).atZone(zoneId).toInstant().toEpochMilli();
+
+		// Fetch data within the time range
+		List<VisaRequestMain> byTimeRange = visaRequestMainRepo.findByTimeRange(startOfDay, endOfDay);
+
+		// Initialize the response map
+		Map<String, Map<String, Long>> resultMap = new HashMap<>();
+
+		// Handle the empty case
+		if (byTimeRange.isEmpty()) {
+			Map<String, Long> emptyMap = new HashMap<>();
+			emptyMap.put("Empty", 0L);
+			resultMap.put("QTY", emptyMap);
+			resultMap.put("ICM", emptyMap);
+			return resultMap;
+		}
+
+		// Calculate QTY and ICM data
+		Map<String, Long> qty = chartDataService.getDataAccordingToDays(byTimeRange);
+		Map<String, Long> icn = chartDataService.getIncomeAccordingToDays(byTimeRange);
+
+		// Populate the result map
+		resultMap.put("QTY", qty);
+		resultMap.put("ICM", icn);
+
+		return resultMap;
 	}
 
 }

@@ -2,6 +2,7 @@ package com.visa.services.interfaces;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -9,6 +10,7 @@ import com.visa.modals.Blog;
 import com.visa.modals.EmbassyFeesStructure;
 import com.visa.modals.ImageUpdateDTO;
 import com.visa.modals.Visa;
+import com.visa.modals.VisaRequestMain;
 
 public interface AdminVisaService {
 	
@@ -19,5 +21,9 @@ public interface AdminVisaService {
 	public List<Visa> deleteVisa(Long visaId);
 	public HashSet<String> uploadBlog(Blog blog , MultipartFile banner , MultipartFile img1, MultipartFile img2);
 	public String uploadImage(MultipartFile file);
+	public List<VisaRequestMain> getAllVisaHistory();
+	public Map<String,  Map<String,Long>> getVisaNameAndQt();
+	public Map<String,  Map<String,Long>> getVisaNameAndIncome();
+	public Map<String,  Map<String,Long>> getDatabyDate(String date);
 	
 }
