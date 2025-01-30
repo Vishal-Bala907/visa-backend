@@ -21,6 +21,7 @@ public class JwtService {
 
 //    @Value("${jwt.token.expiry}")
     private long tokenExpiryDuration = 604800000;
+//    private long tokenExpiryDuration = 12048;
 
     public String generateToken(String mobileNumber) {
         return Jwts.builder()

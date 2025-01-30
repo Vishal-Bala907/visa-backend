@@ -3,7 +3,6 @@ package com.visa.services.imple;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -260,6 +259,8 @@ public class AdminVisaServiceImple implements AdminVisaService {
 		List<VisaRequestMain> month = visaRequestMainRepo.findByTimeRange(dateService.getPrevMonthTimestamp(),
 				timestamp);
 		List<VisaRequestMain> year = visaRequestMainRepo.findByTimeRange(dateService.getPrevYearTimestamp(), timestamp);
+		
+		System.out.println(week);
 
 		Map<String, Long> dataAccordingToSevenDays = chartDataService.getDataAccordingToDays(week);
 		Map<String, Long> dataAccordingTo30Days = chartDataService.getDataAccordingToDays(month);
@@ -268,6 +269,8 @@ public class AdminVisaServiceImple implements AdminVisaService {
 		map.put("week", dataAccordingToSevenDays);
 		map.put("month", dataAccordingTo30Days);
 		map.put("year", dataAccordingTo365Days);
+		
+		System.out.println(map);
 
 		return map;
 	}

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -26,7 +25,6 @@ import com.visa.modals.Visa;
 import com.visa.modals.VisaRequestMain;
 import com.visa.repos.ArchiveRepo;
 import com.visa.repos.BlogInterface;
-import com.visa.repos.PaymentRepo;
 import com.visa.repos.UserRepository;
 import com.visa.repos.VisaRepo;
 import com.visa.repos.VisaRequestMainRepo;
@@ -47,8 +45,8 @@ public class BasicServiceImple implements BasicService {
 	private ArchiveRepo archiveRepo;
 	@Autowired
 	private VisaRequestMainRepo visaRequestMainRepo;
-	@Autowired
-	private PaymentRepo paymentRepo;
+//	@Autowired
+//	private PaymentRepo paymentRepo;
 
 	@Override
 	public List<Visa> getAllVisas() {

@@ -37,10 +37,10 @@ public class ChartDataService {
 			if (visa != null) {
 				String visaType = visa.getVisaType();
 				if (map.containsKey(visaType)) {
-					Long long1 = map.get(visaType);
-					map.put(visaType, map.getOrDefault(visaType, 0L) + 1);
+					map.get(visaType);
+					map.put(visaType, map.getOrDefault(visaType, 1L) + 1);
 				} else {
-					map.put(visaType, 0L);
+					map.put(visaType, 1L);
 				}
 			}
 		});

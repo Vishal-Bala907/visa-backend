@@ -8,8 +8,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,7 +31,7 @@ public class VisaRequestMain {
 	private String appointmentDetails;
 	private String purposeOfVisit;
 	private String mobileNumber;
-	@OneToOne
+	@ManyToOne
 	private Visa visa;
 	
 	//

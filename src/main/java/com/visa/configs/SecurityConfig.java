@@ -1,6 +1,9 @@
 package com.visa.configs;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -12,6 +15,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+//import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.visa.services.imple.JwtAuthFilter;
 import com.visa.services.imple.UserDetailsServiceImplementation;
@@ -30,6 +37,8 @@ public class SecurityConfig {
 	private CustomAccessDeniedHandler customAccessDeniedHandler;
 	@Autowired
 	private CustomeAuthenticationEntryPoint authenticationEntryPoint;
+    @Value("${frontend.base.url}")
+    private String CORS;
 	
 	@Bean
 	SecurityFilterChain chain(HttpSecurity httpSecurity) throws Exception {
@@ -47,7 +56,7 @@ public class SecurityConfig {
           .authenticationProvider(authenticationProvider())
           .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
           ;
-		httpSecurity.cors(cors->cors.disable());
+		httpSecurity .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 		httpSecurity.csrf(csrf -> csrf.disable());
 
 		return httpSecurity.build();
@@ -59,6 +68,19 @@ public class SecurityConfig {
 		authenticationProvider.setUserDetailsService(userDetailsServiceImplementation);
 		authenticationProvider.setPasswordEncoder(encoder);
 		return authenticationProvider;
+	}
+	
+	@Bean
+	CorsConfigurationSource corsConfigurationSource() {
+	    CorsConfiguration configuration = new CorsConfiguration();
+	    configuration.setAllowedOrigins(List.of(CORS)); // Uses frontend.base.url
+	    configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+	    configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+	    configuration.setAllowCredentials(true);
+
+	    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+	    source.registerCorsConfiguration("/**", configuration);
+	    return (CorsConfigurationSource) source;
 	}
 	
 	
