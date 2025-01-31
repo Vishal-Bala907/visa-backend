@@ -213,5 +213,16 @@ public class AdminVisaController {
 		Map<String, Map<String, Long>> visaNameAndQt = adminVisaServiceImple.getDatabyDate(date);
 		return new ResponseEntity<Map<String, Map<String, Long>>>(visaNameAndQt, HttpStatus.OK);
 	}
+	
+	@PostMapping("/mark/completed")
+	@PreAuthorize("hasAnyRole('ADMIN')")
+	public ResponseEntity<String> markVisaCompleted(@RequestBody VisaRequestMain visaRequestMain) {
+		
+		String markVisaCompleted = adminVisaServiceImple.markVisaCompleted(visaRequestMain);
+		if(markVisaCompleted == null) {
+			return new ResponseEntity<String>("unable to save", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<String>(markVisaCompleted, HttpStatus.OK);
+	}
 
 }

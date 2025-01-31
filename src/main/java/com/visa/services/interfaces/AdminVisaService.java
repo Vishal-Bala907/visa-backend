@@ -26,5 +26,6 @@ public interface AdminVisaService {
 	public Map<String,  Map<String,Long>> getVisaNameAndQt();
 	public Map<String,  Map<String,Long>> getVisaNameAndIncome();
 	public Map<String,  Map<String,Long>> getDatabyDate(String date);
+	public String markVisaCompleted(VisaRequestMain main);
 	
 }

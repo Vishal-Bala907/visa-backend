@@ -343,4 +343,26 @@ public class AdminVisaServiceImple implements AdminVisaService {
 		return resultMap;
 	}
 
+	@Override
+	public String markVisaCompleted(VisaRequestMain main) {
+		
+		long visaReqId = 0;
+		try {
+			visaReqId = main.getId();
+			Optional<VisaRequestMain> byId = visaRequestMainRepo.findById(visaReqId);
+			if(byId.isEmpty()) {
+				return null;
+			}
+			VisaRequestMain visaRequestMain = byId.get(); 
+			visaRequestMain.setCompletionStatus(true);
+			visaRequestMainRepo.save(visaRequestMain);
+		} catch (Exception e) {
+			return null;
+		}
+		
+		return "Done...";
+	}
+
+
+
 }
