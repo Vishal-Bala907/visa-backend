@@ -20,8 +20,8 @@ public class JwtService {
     private String SECRET_KEY = "78c5981ccd2de0e5f7c5f405c2675cbfd067e524e94878104c4cdd50588e4861";
 
 //    @Value("${jwt.token.expiry}")
-//    private long tokenExpiryDuration = 604800000;
-    private long tokenExpiryDuration = 12048;
+    private long tokenExpiryDuration = 604800000;
+//    private long tokenExpiryDuration = 12048;
 
     public String generateToken(String mobileNumber) {
         return Jwts.builder()
