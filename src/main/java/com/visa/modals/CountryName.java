@@ -25,6 +25,7 @@ public class CountryName {
 	
 	private String countryName;
 	
-	@OneToMany(cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "countryName", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Visa> visas;
+
 }
