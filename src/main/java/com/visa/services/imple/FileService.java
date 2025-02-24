@@ -51,21 +51,21 @@ public class FileService {
 			return null;
 		}
 	}
-	
+
 	public String uploadImage(MultipartFile file) {
 		String fileName = file.getOriginalFilename();
 		try (InputStream inputStream = file.getInputStream()) {
-			final String  FILENAME = Math.random()  + Math.random() + "_" + fileName;
-			Path fileSavePath = Paths.get(System.getProperty("user.dir"), uploadDir,FILENAME);
+			final String FILENAME = Math.random() + Math.random() + "_" + fileName;
+			Path fileSavePath = Paths.get(System.getProperty("user.dir"), uploadDir, FILENAME);
 			File fileDirectory = fileSavePath.getParent().toFile();
-			
-			if(!fileDirectory.exists() && !fileDirectory.mkdirs()) {
+
+			if (!fileDirectory.exists() && !fileDirectory.mkdirs()) {
 				throw new IOException("Failed to create directory: " + fileDirectory.getAbsolutePath());
 			}
-			
+
 			Files.copy(inputStream, fileSavePath, StandardCopyOption.REPLACE_EXISTING);
 			return "images/" + FILENAME;
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -89,7 +89,7 @@ public class FileService {
 
 			// Save the file
 			Files.copy(inputStream, fileSavePath, StandardCopyOption.REPLACE_EXISTING);
-			return "images/"+savedFile;
+			return "images/" + savedFile;
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
@@ -98,39 +98,48 @@ public class FileService {
 
 	// handle base64 image
 	public boolean handleBase64Image(Visa visa, ImageUpdateDTO dto) {
+	    // Base64 image string
+	    String base64 = dto.getImage();
+	    String originalName = dto.getOriginalName();
+	    String savedImageName = Math.random() + visa.getId() + originalName;
+	    String newImagePath = "images/" + savedImageName;
+	    String filePath = uploadDir + File.separator + savedImageName;
 
-		// base64 image string
-		String base64 = dto.getImage();
-		String originalName = dto.getOriginalName();
-		String savedImageName = Math.random() + visa.getId() + originalName;
+	    try {
+	        // Decode the Base64 string to bytes
+	        byte[] image = Base64.getDecoder().decode(base64);
 
-		try {
-			byte[] image = Base64.getDecoder().decode(base64);
-			String filePath = uploadDir + File.separator + savedImageName;
+	        // Save the new image first
+	        try (FileOutputStream fos = new FileOutputStream(filePath)) {
+	            fos.write(image);
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            return false;
+	        }
 
-			// delete the old image
-			deleteImageByVisaId(visa.getBannerImage());
+	        // Update the Visa entity with the new image path
+	        String oldImagePath = visa.getBannerImage();
+	        visa.setBannerImage(newImagePath);
+	        repo.save(visa); // Save changes to the database
 
-			// save the new image path to the db
-			visa.setBannerImage("images/" + savedImageName);
-			// save the changes
-			repo.save(visa);
+	        // Delete the old image after successfully saving the new one
+	        if (oldImagePath != null && !oldImagePath.isEmpty()) {
+	            try {
+	                deleteImageByVisaId(oldImagePath);
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	                // Not critical, don't return false as the new image is saved successfully
+	            }
+	        }
 
-			try {
-				FileOutputStream fos = new FileOutputStream(filePath);
-				fos.write(image);
-				fos.close();
-			} catch (Exception e) {
-				e.printStackTrace();
-				return false;
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return false;
+	    }
 
-		return true;
+	    return true;
 	}
+
 
 	public void deleteImageByVisaId(String img) throws Exception {
 		// Fetch the image details from the database (if needed)

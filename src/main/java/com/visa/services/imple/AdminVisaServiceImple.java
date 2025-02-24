@@ -33,6 +33,8 @@ import com.visa.repos.VisaRequestMainRepo;
 import com.visa.repos.VisaTypeInterface;
 import com.visa.services.interfaces.AdminVisaService;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class AdminVisaServiceImple implements AdminVisaService {
 
@@ -164,30 +166,45 @@ public class AdminVisaServiceImple implements AdminVisaService {
 	}
 
 	@Override
+	@Transactional
 	public List<Visa> deleteVisa(Long visaId) {
-		if (visaId == null) {
-			return null;
-		}
+	    if (visaId == null) {
+	        return null;
+	    }
 
-		Optional<Visa> byId = visaRepo.findById(visaId);
-		if (byId.isEmpty()) {
-			return null;
-		}
+	    // Find the Visa by its ID
+	    Optional<Visa> byId = visaRepo.findById(visaId);
+	    if (byId.isEmpty()) {
+	        return null;
+	    }
 
-		// delete the image first
-		Visa visa = byId.get();
-		try {
-			fileService.deleteImageByVisaId(visa.getBannerImage());
-			// delete the visa obj
-			visaRepo.delete(visa);
-		} catch (Exception e) {
-			e.printStackTrace();
-			visaRepo.delete(visa);
-			return null;
-		}
+	    // Get the Visa object
+	    Visa visa = byId.get();
+	    String countryName = visa.getCountyName();
 
-		return visaRepo.findAll();
+	    // Find the corresponding CountryName by country name
+	    Optional<CountryName> byCountryName = countryNameRepo.findByCountryName(countryName);
+	    if (byCountryName.isEmpty()) {
+	        return null;
+	    }
+	    
+	    CountryName country = byCountryName.get();
+
+	    // Remove the Visa from the CountryName's visas list
+	    country.getVisas().remove(visa);
+	    countryNameRepo.save(country);  // Save to trigger orphan removal
+
+	    // Delete the image associated with the Visa
+	    try {
+	        fileService.deleteImageByVisaId(visa.getBannerImage());
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+
+	    // Return the updated list of Visas
+	    return visaRepo.findAll();
 	}
+
 
 	@Override
 	public HashSet<String> uploadBlog(Blog blog, MultipartFile banner, MultipartFile img1, MultipartFile img2) {
@@ -260,7 +277,7 @@ public class AdminVisaServiceImple implements AdminVisaService {
 		List<VisaRequestMain> month = visaRequestMainRepo.findByTimeRange(dateService.getPrevMonthTimestamp(),
 				timestamp);
 		List<VisaRequestMain> year = visaRequestMainRepo.findByTimeRange(dateService.getPrevYearTimestamp(), timestamp);
-		
+
 		System.out.println(week);
 
 		Map<String, Long> dataAccordingToSevenDays = chartDataService.getDataAccordingToDays(week);
@@ -270,7 +287,7 @@ public class AdminVisaServiceImple implements AdminVisaService {
 		map.put("week", dataAccordingToSevenDays);
 		map.put("month", dataAccordingTo30Days);
 		map.put("year", dataAccordingTo365Days);
-		
+
 		System.out.println(map);
 
 		return map;
@@ -346,24 +363,22 @@ public class AdminVisaServiceImple implements AdminVisaService {
 
 	@Override
 	public String markVisaCompleted(VisaRequestMain main) {
-		
+
 		long visaReqId = 0;
 		try {
 			visaReqId = main.getId();
 			Optional<VisaRequestMain> byId = visaRequestMainRepo.findById(visaReqId);
-			if(byId.isEmpty()) {
+			if (byId.isEmpty()) {
 				return null;
 			}
-			VisaRequestMain visaRequestMain = byId.get(); 
+			VisaRequestMain visaRequestMain = byId.get();
 			visaRequestMain.setCompletionStatus(true);
 			visaRequestMainRepo.save(visaRequestMain);
 		} catch (Exception e) {
 			return null;
 		}
-		
+
 		return "Done...";
 	}
-
-
 
 }
