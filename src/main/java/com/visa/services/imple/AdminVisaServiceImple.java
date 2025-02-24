@@ -182,6 +182,7 @@ public class AdminVisaServiceImple implements AdminVisaService {
 			visaRepo.delete(visa);
 		} catch (Exception e) {
 			e.printStackTrace();
+			visaRepo.delete(visa);
 			return null;
 		}
 
