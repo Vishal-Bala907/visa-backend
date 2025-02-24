@@ -187,12 +187,23 @@ public class AdminVisaServiceImple implements AdminVisaService {
 	    if (byCountryName.isEmpty()) {
 	        return null;
 	    }
-	    
+
 	    CountryName country = byCountryName.get();
 
-	    // Remove the Visa from the CountryName's visas list
-	    country.getVisas().remove(visa);
-	    countryNameRepo.save(country);  // Save to trigger orphan removal
+	    // **Remove the Visa from the CountryName's visas list**
+	    if (country.getVisas().contains(visa)) {
+	        country.getVisas().remove(visa);
+	        visa.setCountryName(null); // Break the association
+	        countryNameRepo.save(country);  // Save to trigger orphan removal
+	    }
+
+	    // **Delete the Visa** (after removing from parent list)
+	    try {
+	    	
+	    	visaRepo.delete(visa);
+	    }catch (Exception e) {
+			e.printStackTrace();
+		}
 
 	    // Delete the image associated with the Visa
 	    try {
@@ -204,6 +215,7 @@ public class AdminVisaServiceImple implements AdminVisaService {
 	    // Return the updated list of Visas
 	    return visaRepo.findAll();
 	}
+
 
 
 	@Override

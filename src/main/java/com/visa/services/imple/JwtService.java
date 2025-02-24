@@ -20,14 +20,14 @@ public class JwtService {
     private String SECRET_KEY = "78c5981ccd2de0e5f7c5f405c2675cbfd067e524e94878104c4cdd50588e4861";
 
 //    @Value("${jwt.token.expiry}")
-    private long tokenExpiryDuration = 604800000;
+    private long tokenExpiryDuration = 999999999;
 //    private long tokenExpiryDuration = 12048;
 
     public String generateToken(String mobileNumber) {
         return Jwts.builder()
                 .setSubject(mobileNumber)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiryDuration)) // Configurable expiration time
+                .setExpiration(new Date(System.currentTimeMillis() + (tokenExpiryDuration + tokenExpiryDuration))) // Configurable expiration time
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
